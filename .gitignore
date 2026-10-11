@@ -1,0 +1,52 @@
+# ============================================
+# Git Ignore - AI Treasure Hunter
+# ============================================
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment and sensitive keys
+.env
+.env.*
+*.pem
+*.key
+*.cert
+
+# Temporary test scripts and error logs
+test*.js
+test*.mjs
+test*.html
+test*.txt
+final_test.js
+AStar_temp.js
+check_syntax.mjs
+*.err
+*.out
+err*.txt
+out*.txt
+patch*.txt
+
+# Kits & external subprojects
+suriya_starter/
+suriya-engineering-kit/
+
+# Build & Dist
+.dist/
+dist/
+build/
+
+# IDE & Editor files
+.agents/
+.gemini/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini

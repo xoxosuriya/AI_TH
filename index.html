@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Treasure Hunter — Autonomous Multi-Agent Arena</title>
+    <meta name="description" content="State-of-the-art autonomous multi-agent dungeon crawler featuring A* pathfinding, utility heuristics, procedural synthesis audio, and dynamic particle effects.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><polygon fill='%2338BDF8' points='12 2 2 8 12 14 22 8 12 2'/></svg>">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loading-card">
+            <h1 class="loading-title">AI TREASURE HUNTER</h1>
+            <p class="loading-subtitle">Synthesizing audio nodes & initializing heuristic meshes...</p>
+            <div class="loading-bar">
+                <div class="loading-bar-fill" id="loadingBarFill"></div>
+            </div>
+            <p id="loadingText">0%</p>
+        </div>
+    </div>
+
+    <!-- Header Navigation Bar -->
+    <header class="site-header">
+        <div class="brand-section">
+            <div class="brand-logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <polygon points="12 2 2 8 12 14 22 8 12 2"></polygon>
+                    <polygon points="2 12 12 18 22 12 12 16 2 12"></polygon>
+                </svg>
+            </div>
+            <div>
+                <h1 class="brand-title">AI TREASURE HUNTER</h1>
+            </div>
+            <div class="live-badge" id="fpsBadge">
+                <span class="live-dot"></span>
+                <span id="systemStatusText">SIMULATION ACTIVE</span>
+            </div>
+        </div>
+
+        <nav class="nav-actions">
+            <!-- Audio Toggle with live equalizer wave -->
+            <button class="btn-pill" id="audioToggleBtn" title="Toggle Procedural Synthesizer Audio (M)">
+                <span class="sound-bars" aria-hidden="true">
+                    <span class="sound-bar"></span>
+                    <span class="sound-bar"></span>
+                    <span class="sound-bar"></span>
+                </span>
+                <span id="audioLabel">AUDIO ON</span>
+            </button>
+
+            <!-- CRT Scanline Effect Toggle -->
+            <button class="btn-pill" id="scanlineToggleBtn" title="Toggle CRT Retro Scanline Shader">
+                <span>CRT FX</span>
+            </button>
+
+            <!-- Neural Debug Path Overlay Toggle -->
+            <button class="btn-pill" id="neuralToggleBtn" title="Toggle Neural Path Overlay (F1)">
+                <span>NEURAL MESH</span>
+            </button>
+
+            <!-- Keyboard & Guide Modal Button -->
+            <button class="btn-pill" id="guideToggleBtn" title="Operator Guide & Rules">
+                <span>? GUIDE</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Content & Game Arena -->
+    <main class="main-wrapper">
+        <div class="arena-frame-outer">
+            <div class="arena-corner top-left"></div>
+            <div class="arena-corner top-right"></div>
+            <div class="arena-corner bottom-left"></div>
+            <div class="arena-corner bottom-right"></div>
+
+            <div class="canvas-wrapper">
+                <div class="scanlines-overlay" id="scanlineOverlay"></div>
+                <canvas id="gameCanvas" width="960" height="640"></canvas>
+            </div>
+        </div>
+
+        <!-- Bento Grid Telemetry Deck -->
+        <section class="bento-grid">
+            <!-- Card 1: Autonomous Agent Neural Monitor -->
+            <article class="bento-card card-agents">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        AUTONOMOUS AGENT MONITOR
+                    </h2>
+                    <span class="card-pill" id="agentCountPill">2 DRONES ACTIVE</span>
+                </div>
+                <div class="agent-feed" id="agentFeedContainer">
+                    <!-- Populated dynamically via JS telemetry loop -->
+                    <div class="agent-row">
+                        <div class="agent-info">
+                            <span class="agent-dot"></span>
+                            <div>
+                                <div class="agent-name">DRONE ALPHA</div>
+                                <span class="agent-state-badge">PATROL</span>
+                            </div>
+                        </div>
+                        <div class="agent-metrics">
+                            <div class="agent-target">HEURISTIC SCAN</div>
+                            <div class="agent-score">0 PTS</div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 2: Algorithmic Architecture -->
+            <article class="bento-card card-mechanics">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        ALGORITHMIC PIPELINE
+                    </h2>
+                    <span class="card-pill">v2.4 KINEMATICS</span>
+                </div>
+                <div class="mechanics-list">
+                    <div class="mechanic-item">
+                        <span class="mechanic-name">1. A* Pathfinding</span>
+                        <code class="mechanic-formula">f(n) = g(n) + h(n) + 0.001*cross</code>
+                        <p class="mechanic-desc">Evaluates collision-free shortest waypoint chains with Manhattan tie-breaking in &lt;1.2ms.</p>
+                    </div>
+                    <div class="mechanic-item">
+                        <span class="mechanic-name">2. Utility Heuristic</span>
+                        <code class="mechanic-formula">U(T) = (Val^1.2) / (Dist + 15) * P_contest</code>
+                        <p class="mechanic-desc">Weights valuable gems against distance and dynamic competitor proximity.</p>
+                    </div>
+                    <div class="mechanic-item">
+                        <span class="mechanic-name">3. Steering & Separation</span>
+                        <code class="mechanic-formula">F_steer = v_desired - v_curr</code>
+                        <p class="mechanic-desc">Smooths continuous trajectory and prevents agent corridor crowding.</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 3: Quick Command Console -->
+            <article class="bento-card card-console">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        COMMAND CONSOLE
+                    </h2>
+                    <span class="card-pill">DIRECT OVERRIDE</span>
+                </div>
+                <div class="console-actions">
+                    <div>
+                        <div class="console-label">Select Mission Sector</div>
+                        <div class="console-button-row">
+                            <button class="console-btn selected" data-sector="0">SEC 01</button>
+                            <button class="console-btn" data-sector="1">SEC 02</button>
+                            <button class="console-btn" data-sector="2">SEC 03</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="console-label">Threat Calibration</div>
+                        <div class="console-button-row" style="grid-template-columns: repeat(4, 1fr);">
+                            <button class="console-btn" data-diff="0">SCOUT</button>
+                            <button class="console-btn selected" data-diff="1">TACT</button>
+                            <button class="console-btn" data-diff="2">WAR</button>
+                            <button class="console-btn" data-diff="3">HIVE</button>
+                        </div>
+                    </div>
+
+                    <button class="action-launch-btn" id="consoleLaunchBtn">DEPLOY SECTOR RUN</button>
+                    <button class="console-btn" id="consoleRestartBtn">RESTART CURRENT RUN (R)</button>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <!-- Modal Help / Guide Dialog -->
+    <div class="modal-overlay" id="guideModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 style="font-family: var(--font-display); font-size: 1.3rem;">OPERATOR MANUAL</h2>
+                <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88rem; color: var(--text-muted);">
+                <p><strong style="color: #fff;">Objective:</strong> Collect treasures across ancient dungeon ruins before the autonomous AI agents strip them. Reach the target score quota to illuminate the exit beacon, then escape!</p>
+                
+                <div style="background: rgba(2, 6, 23, 0.5); padding: 12px; border-radius: 8px; border: 1px solid var(--border-glass);">
+                    <div style="color: var(--cyan); font-weight: 600; margin-bottom: 6px;">FLIGHT CONTROLS</div>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 4px;">
+                        <li><span style="color: #fff; font-family: var(--font-mono);">WASD / Arrows</span> — Move operative</li>
+                        <li><span style="color: #fff; font-family: var(--font-mono);">P / ESC</span> — Pause simulation</li>
+                        <li><span style="color: #fff; font-family: var(--font-mono);">R</span> — Instant restart current sector</li>
+                        <li><span style="color: #fff; font-family: var(--font-mono);">M</span> — Toggle procedural audio synthesizer</li>
+                        <li><span style="color: #fff; font-family: var(--font-mono);">F1</span> — Toggle real-time A* path & sensory mesh</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(2, 6, 23, 0.5); padding: 12px; border-radius: 8px; border: 1px solid var(--border-glass);">
+                    <div style="color: var(--emerald); font-weight: 600; margin-bottom: 6px;">RELIC VALUES</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-family: var(--font-mono); font-size: 0.8rem;">
+                        <span style="color: var(--amber);">â—† Gold Coin: 10 PTS</span>
+                        <span style="color: var(--cyan);">â—† Sapphire: 25 PTS</span>
+                        <span style="color: var(--rose);">â—† Ruby Gem: 50 PTS</span>
+                        <span style="color: var(--purple);">â—† Relic Core: 100 PTS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Game Bootstrap -->
+    <script type="module" src="./src/main.js"></script>
+
+    <!-- Shell Interactions & Live Bento Telemetry Script -->
+    <script type="module">
+        import { sound } from './src/utils/AudioSystem.js';
+
+        // DOM elements
+        const audioBtn = document.getElementById('audioToggleBtn');
+        const audioLabel = document.getElementById('audioLabel');
+        const scanlineBtn = document.getElementById('scanlineToggleBtn');
+        const scanlineOverlay = document.getElementById('scanlineOverlay');
+        const neuralBtn = document.getElementById('neuralToggleBtn');
+        const guideBtn = document.getElementById('guideToggleBtn');
+        const guideModal = document.getElementById('guideModal');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const agentFeed = document.getElementById('agentFeedContainer');
+        const agentCountPill = document.getElementById('agentCountPill');
+        const consoleLaunchBtn = document.getElementById('consoleLaunchBtn');
+        const consoleRestartBtn = document.getElementById('consoleRestartBtn');
+
+        // Audio Toggle
+        audioBtn.addEventListener('click', () => {
+            const isMuted = sound.toggleMute();
+            if (isMuted) {
+                audioBtn.classList.add('muted');
+                audioLabel.textContent = 'MUTED';
+            } else {
+                audioBtn.classList.remove('muted');
+                audioLabel.textContent = 'AUDIO ON';
+                sound.playMenuSelect();
+            }
+        });
+
+        // Scanlines Toggle
+        scanlineBtn.addEventListener('click', () => {
+            scanlineOverlay.classList.toggle('active');
+            scanlineBtn.classList.toggle('active');
+            sound.playMenuHover();
+        });
+
+        // Neural Mesh Toggle
+        neuralBtn.addEventListener('click', () => {
+            if (window.game) {
+                window.game.showDebug = !window.game.showDebug;
+                neuralBtn.classList.toggle('active', window.game.showDebug);
+                sound.playMenuSelect();
+            }
+        });
+
+        // Guide Modal
+        guideBtn.addEventListener('click', () => {
+            guideModal.classList.add('open');
+            sound.playMenuHover();
+        });
+        modalCloseBtn.addEventListener('click', () => {
+            guideModal.classList.remove('open');
+            sound.playMenuHover();
+        });
+        guideModal.addEventListener('click', (e) => {
+            if (e.target === guideModal) guideModal.classList.remove('open');
+        });
+
+        // Console Sector Selection
+        let selectedSector = 0;
+        let selectedDiff = 1;
+
+        document.querySelectorAll('[data-sector]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-sector]').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedSector = parseInt(btn.dataset.sector, 10);
+                sound.playMenuHover();
+            });
+        });
+
+        document.querySelectorAll('[data-diff]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-diff]').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedDiff = parseInt(btn.dataset.diff, 10);
+                sound.playMenuHover();
+            });
+        });
+
+        consoleLaunchBtn.addEventListener('click', () => {
+            if (window.game && window.game.uiManager) {
+                window.game.uiManager.setSelectedDifficulty(selectedDiff);
+                window.game.uiManager.setSelectedLevel(selectedSector);
+                if (typeof window.game.uiManager.onStartGame === 'function') {
+                    window.game.uiManager.onStartGame(selectedSector, window.game.uiManager.getSelectedDifficulty());
+                }
+                sound.playMenuSelect();
+            }
+        });
+
+        consoleRestartBtn.addEventListener('click', () => {
+            if (window.game && typeof window.game._loadLevel === 'function') {
+                window.game._loadLevel(window.game.levelManager.currentLevelIndex);
+                window.game.state = 'PLAYING';
+                window.game.uiManager.currentScreen = null;
+                sound.playMenuSelect();
+            }
+        });
+
+        // Live Bento Telemetry Polling Loop (10Hz)
+        setInterval(() => {
+            if (!window.game || !window.game.entityManager) return;
+            const agents = window.game.entityManager.aiAgents || [];
+            
+            if (agentCountPill) {
+                agentCountPill.textContent = `${agents.length} DRONES ACTIVE`;
+            }
+
+            if (agents.length === 0) {
+                agentFeed.innerHTML = `
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 14px;">
+                        Simulation standby. Deploy a sector run to activate autonomous agents.
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            for (let i = 0; i < agents.length; i++) {
+                const a = agents[i];
+                const state = a.stateMachine?.currentState?.toUpperCase() || 'SCAN';
+                const targetType = a.currentTarget?.type ? a.currentTarget.type.toUpperCase() : 'SEARCH';
+                const utility = a.utilityScore ? a.utilityScore.toFixed(1) : '0.0';
+                const score = a.score || 0;
+                
+                let stateColor = '#38BDF8';
+                if (state === 'PURSUING' || state === 'MOVING') stateColor = '#F59E0B';
+                if (state === 'COLLECTING') stateColor = '#10B981';
+
+                html += `
+                    <div class="agent-row">
+                        <div class="agent-info">
+                            <span class="agent-dot" style="background: ${stateColor}; box-shadow: 0 0 8px ${stateColor};"></span>
+                            <div>
+                                <div class="agent-name">DRONE ${a.agentId || (i + 1)}</div>
+                                <span class="agent-state-badge" style="color: ${stateColor};">${state}</span>
+                            </div>
+                        </div>
+                        <div class="agent-metrics">
+                            <div class="agent-target">${targetType} (U: ${utility})</div>
+                            <div class="agent-score">SCORE: ${score} PTS</div>
+                        </div>
+                    </div>
+                `;
+            }
+            agentFeed.innerHTML = html;
+        }, 120);
+    </script>
+</body>
+</html>

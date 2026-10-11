@@ -1,0 +1,22 @@
+{
+  "name": "ai-treasure-hunter",
+  "version": "2.4.0",
+  "description": "AI Treasure Hunter - Real-Time Autonomous AI Agents with A* Pathfinding and Utility Decision Theory",
+  "main": "server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs"
+  },
+  "keywords": [
+    "game",
+    "ai",
+    "a-star",
+    "pathfinding",
+    "utility-theory",
+    "canvas",
+    "html5"
+  ],
+  "author": "Suriya Prakash S",
+  "license": "MIT"
+}
