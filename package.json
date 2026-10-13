@@ -1,21 +1,22 @@
 {
-  "name": "ai-treasure-hunter",
-  "version": "2.4.0",
-  "description": "AI Treasure Hunter - Real-Time Autonomous AI Agents with A* Pathfinding and Utility Decision Theory",
+  "name": "ai-treasure-hunter-royal-edition",
+  "version": "3.0.0",
+  "description": "AI Treasure Hunter: Royal Artifact Edition — Competitive Multi-Agent Dungeon Exploration with A* Pathfinding and Utility Theory",
   "main": "server.mjs",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "dev": "node server.mjs"
+    "dev": "node server.mjs",
+    "test": "node tests/runner.js"
   },
   "keywords": [
-    "game",
-    "ai",
-    "a-star",
-    "pathfinding",
+    "game-ai",
+    "a-star-pathfinding",
     "utility-theory",
-    "canvas",
-    "html5"
+    "steering-behaviours",
+    "multi-agent",
+    "html5-canvas",
+    "royal-artifact-edition"
   ],
   "author": "Suriya Prakash S",
   "license": "MIT"

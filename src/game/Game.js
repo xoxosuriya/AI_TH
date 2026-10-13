@@ -1,5 +1,6 @@
 import { particles } from '../rendering/ParticleSystem.js';
 import { sound } from '../utils/AudioSystem.js';
+import { CONFIG } from '../config.js';
 
 export class Game {
     constructor(canvas, assetLoader = null) {
@@ -119,10 +120,35 @@ export class Game {
             this.camera.centerY = playerSpawn.y * 64 + 32;
         }
         
+        // Difficulty-scaled AI Rivals with Royal Personas
+        const diffKey = this.uiManager ? this.uiManager.getSelectedDifficulty() : 'medium';
+        const diffConfig = CONFIG.DIFFICULTIES[diffKey] || CONFIG.DIFFICULTIES.medium;
+        const aiCount = Math.min(diffConfig.aiCount || 2, 4);
+        
+        const rivalPersonas = [
+            { name: 'Lord Alistair', color: '#E05252' },
+            { name: 'Lady Vivienne', color: '#3895D3' },
+            { name: 'Sir Rowan', color: '#10B981' },
+            { name: 'Corvus the Rogue', color: '#9B5DE5' }
+        ];
+        
         const aiSpawns = this.mapManager.getAISpawns();
-        aiSpawns.forEach((spawn, index) => {
-            this.entityManager.createAIAgent(spawn.x * 64 + 32, spawn.y * 64 + 32, `ai_${index}`);
-        });
+        for (let i = 0; i < aiCount; i++) {
+            const spawn = aiSpawns[i] || aiSpawns[0];
+            if (spawn) {
+                const persona = rivalPersonas[i % rivalPersonas.length];
+                this.entityManager.createAIAgent(spawn.x * 64 + 32, spawn.y * 64 + 32, `ai_${i + 1}`, {
+                    difficulty: diffKey,
+                    speed: diffConfig.speed,
+                    color: persona.color,
+                    nameLabel: persona.name
+                });
+            }
+        }
+        
+        // Initialize Level Timer with Difficulty Multiplier
+        const baseTime = levelData.timeLimit || 75;
+        this.timeRemaining = baseTime * (diffConfig.timerMultiplier || 1.0);
         
         const treasures = levelData.treasures || [];
         if (treasures.length > 0) {
@@ -215,6 +241,26 @@ export class Game {
                 // Update camera to follow player
                 this.camera.update(deltaTime);
                 
+                // Decrement level countdown timer
+                if (typeof this.timeRemaining === 'number') {
+                    this.timeRemaining -= deltaTime;
+                    if (this.timeRemaining <= 0) {
+                        this.timeRemaining = 0;
+                        sound.playDefeat();
+                        this.state = 'LEVEL_FAILED';
+                        const currentLvl = this.levelManager.getCurrentLevel();
+                        const targetScore = currentLvl ? (currentLvl.targetScore || 80) : 80;
+                        const playerScore = this.entityManager.player ? this.entityManager.player.score : 0;
+                        this.uiManager.showLevelResults({
+                            score: playerScore,
+                            targetScore: targetScore,
+                            level: currentLvl,
+                            success: false
+                        });
+                        break;
+                    }
+                }
+                
                 // Check level completion
                 const currentLvl = this.levelManager.getCurrentLevel();
                 const targetScore = currentLvl ? (currentLvl.targetScore || 60) : 60;
@@ -253,7 +299,7 @@ export class Game {
                 }
                 break;
             case 'LEVEL_COMPLETE':
-                if (this.inputManager.justPressed('Enter') || this.inputManager.justPressed('KeyN')) {
+                if (this.inputManager.justPressed('Enter') || this.inputManager.justPressed('KeyN') || this.inputManager.justPressed('Space')) {
                     sound.playMenuSelect();
                     if (this.levelManager.hasNextLevel()) {
                         this.levelManager.nextLevel();
@@ -262,6 +308,18 @@ export class Game {
                     this.state = 'PLAYING';
                     this.uiManager.currentScreen = null;
                 } else if (this.inputManager.justPressed('KeyR')) {
+                    sound.playMenuSelect();
+                    this._loadLevel(this.levelManager.currentLevelIndex);
+                    this.state = 'PLAYING';
+                    this.uiManager.currentScreen = null;
+                } else if (this.inputManager.justPressed('KeyM') || this.inputManager.justPressed('Escape')) {
+                    sound.playMenuHover();
+                    this.state = 'MENU';
+                    this.uiManager.showMenu();
+                }
+                break;
+            case 'LEVEL_FAILED':
+                if (this.inputManager.justPressed('Enter') || this.inputManager.justPressed('KeyR') || this.inputManager.justPressed('Space')) {
                     sound.playMenuSelect();
                     this._loadLevel(this.levelManager.currentLevelIndex);
                     this.state = 'PLAYING';

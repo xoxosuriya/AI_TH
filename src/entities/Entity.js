@@ -73,6 +73,11 @@ export class Entity {
         return distance < (this.radius + other.radius);
     }
     
+    // Alias for overlaps
+    collidesWith(other) {
+        return this.overlaps(other);
+    }
+    
     // Distance to another entity or point
     distanceTo(other) {
         if (!other) return Infinity;

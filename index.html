@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Treasure Hunter — Autonomous Multi-Agent Arena</title>
-    <meta name="description" content="State-of-the-art autonomous multi-agent dungeon crawler featuring A* pathfinding, utility heuristics, procedural synthesis audio, and dynamic particle effects.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><polygon fill='%2338BDF8' points='12 2 2 8 12 14 22 8 12 2'/></svg>">
-    <!-- Google Fonts -->
+    <title>AI Treasure Hunter — Royal Artifact Edition</title>
+    <meta name="description" content="A prestigious multi-agent dungeon treasure-hunting game featuring A* pathfinding, utility heuristics, steering dynamics, and real-time algorithmic competition.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><polygon fill='%23D4AF37' points='12 2 2 8 12 14 22 8 12 2'/></svg>">
+    <!-- Google Fonts: Cinzel (Display), Outfit, Space Grotesk, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -18,7 +18,7 @@
     <div id="loadingScreen">
         <div class="loading-card">
             <h1 class="loading-title">AI TREASURE HUNTER</h1>
-            <p class="loading-subtitle">Synthesizing audio nodes & initializing heuristic meshes...</p>
+            <p class="loading-subtitle">Unsealing royal vaults & initializing heuristic decision meshes...</p>
             <div class="loading-bar">
                 <div class="loading-bar-fill" id="loadingBarFill"></div>
             </div>
@@ -29,14 +29,15 @@
     <!-- Header Navigation Bar -->
     <header class="site-header">
         <div class="brand-section">
-            <div class="brand-logo" aria-hidden="true">
+            <div class="brand-crest" aria-hidden="true">
+                <!-- Royal Crown / Gem Emblem SVG -->
                 <svg viewBox="0 0 24 24">
-                    <polygon points="12 2 2 8 12 14 22 8 12 2"></polygon>
-                    <polygon points="2 12 12 18 22 12 12 16 2 12"></polygon>
+                    <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 14h14v2H5v-2z"></path>
                 </svg>
             </div>
-            <div>
+            <div class="brand-title-wrap">
                 <h1 class="brand-title">AI TREASURE HUNTER</h1>
+                <span class="brand-subtitle">Royal Artifact Edition &bull; Multi-Agent Arena</span>
             </div>
             <div class="live-badge" id="fpsBadge">
                 <span class="live-dot"></span>
@@ -55,19 +56,19 @@
                 <span id="audioLabel">AUDIO ON</span>
             </button>
 
-            <!-- CRT Scanline Effect Toggle -->
-            <button class="btn-pill" id="scanlineToggleBtn" title="Toggle CRT Retro Scanline Shader">
-                <span>CRT FX</span>
+            <!-- Gilded CRT Shader Toggle -->
+            <button class="btn-pill" id="scanlineToggleBtn" title="Toggle Gilded Vignette Shader">
+                <span>VIGNETTE</span>
             </button>
 
             <!-- Neural Debug Path Overlay Toggle -->
-            <button class="btn-pill" id="neuralToggleBtn" title="Toggle Neural Path Overlay (F1)">
-                <span>NEURAL MESH</span>
+            <button class="btn-pill" id="neuralToggleBtn" title="Toggle AI Decision & Path Overlay (F1)">
+                <span>AI DEBUG (F1)</span>
             </button>
 
-            <!-- Keyboard & Guide Modal Button -->
-            <button class="btn-pill" id="guideToggleBtn" title="Operator Guide & Rules">
-                <span>? GUIDE</span>
+            <!-- Operator Manual & Rules -->
+            <button class="btn-pill" id="guideToggleBtn" title="Expedition Manual & Rules">
+                <span>? MANUAL</span>
             </button>
         </nav>
     </header>
@@ -88,26 +89,26 @@
 
         <!-- Bento Grid Telemetry Deck -->
         <section class="bento-grid">
-            <!-- Card 1: Autonomous Agent Neural Monitor -->
+            <!-- Card 1: Autonomous Royal Rivals Monitor -->
             <article class="bento-card card-agents">
                 <div class="card-header">
                     <h2 class="card-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2">
                             <circle cx="12" cy="12" r="3"></circle>
                             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                         </svg>
-                        AUTONOMOUS AGENT MONITOR
+                        ROYAL RIVAL MONITOR
                     </h2>
-                    <span class="card-pill" id="agentCountPill">2 DRONES ACTIVE</span>
+                    <span class="card-pill" id="agentCountPill">2 RIVALS ACTIVE</span>
                 </div>
                 <div class="agent-feed" id="agentFeedContainer">
                     <!-- Populated dynamically via JS telemetry loop -->
                     <div class="agent-row">
                         <div class="agent-info">
-                            <span class="agent-dot"></span>
+                            <span class="agent-dot" style="background: #E05252;"></span>
                             <div>
-                                <div class="agent-name">DRONE ALPHA</div>
-                                <span class="agent-state-badge">PATROL</span>
+                                <div class="agent-name">LORD ALISTAIR</div>
+                                <span class="agent-state-badge" style="color: #E05252;">PATROL</span>
                             </div>
                         </div>
                         <div class="agent-metrics">
@@ -118,11 +119,11 @@
                 </div>
             </article>
 
-            <!-- Card 2: Algorithmic Architecture -->
+            <!-- Card 2: Algorithmic Architecture Compendium -->
             <article class="bento-card card-mechanics">
                 <div class="card-header">
                     <h2 class="card-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4D9C77" stroke-width="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
                             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -130,62 +131,65 @@
                         </svg>
                         ALGORITHMIC PIPELINE
                     </h2>
-                    <span class="card-pill">v2.4 KINEMATICS</span>
+                    <span class="card-pill">ACADEMIC VIVA ENGINE</span>
                 </div>
                 <div class="mechanics-list">
                     <div class="mechanic-item">
-                        <span class="mechanic-name">1. A* Pathfinding</span>
-                        <code class="mechanic-formula">f(n) = g(n) + h(n) + 0.001*cross</code>
-                        <p class="mechanic-desc">Evaluates collision-free shortest waypoint chains with Manhattan tie-breaking in &lt;1.2ms.</p>
+                        <span class="mechanic-name">1. A* Pathfinding (Min-Heap)</span>
+                        <code class="mechanic-formula">f(n) = g(n) + h(n), h(n) = |dx| + |dy|</code>
+                        <p class="mechanic-desc">Evaluates optimal grid waypoint chains with binary min-heap priority queue in &lt;1.2ms.</p>
                     </div>
                     <div class="mechanic-item">
-                        <span class="mechanic-name">2. Utility Heuristic</span>
-                        <code class="mechanic-formula">U(T) = (Val^1.2) / (Dist + 15) * P_contest</code>
-                        <p class="mechanic-desc">Weights valuable gems against distance and dynamic competitor proximity.</p>
+                        <span class="mechanic-name">2. Multi-Factor Utility Function</span>
+                        <code class="mechanic-formula">U(t) = w_v·V + w_d·D + w_r·R + w_c·C + w_u·U</code>
+                        <p class="mechanic-desc">Balances treasure value, path distance, competitor threat, risk, and timer urgency.</p>
                     </div>
                     <div class="mechanic-item">
-                        <span class="mechanic-name">3. Steering & Separation</span>
-                        <code class="mechanic-formula">F_steer = v_desired - v_curr</code>
-                        <p class="mechanic-desc">Smooths continuous trajectory and prevents agent corridor crowding.</p>
+                        <span class="mechanic-name">3. Steering Forces & Separation</span>
+                        <code class="mechanic-formula">F_steer = v_desired - v_curr (Seek + Avoid)</code>
+                        <p class="mechanic-desc">Smooths continuous physical movement and resolves corridor crowding without clipping.</p>
                     </div>
                 </div>
             </article>
 
-            <!-- Card 3: Quick Command Console -->
+            <!-- Card 3: Expedition Command Console -->
             <article class="bento-card card-console">
                 <div class="card-header">
                     <h2 class="card-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C6A15B" stroke-width="2">
                             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                             <line x1="8" y1="21" x2="16" y2="21"></line>
                             <line x1="12" y1="17" x2="12" y2="21"></line>
                         </svg>
-                        COMMAND CONSOLE
+                        EXPEDITION CONSOLE
                     </h2>
-                    <span class="card-pill">DIRECT OVERRIDE</span>
+                    <span class="card-pill">VAULT OVERRIDE</span>
                 </div>
                 <div class="console-actions">
                     <div>
-                        <div class="console-label">Select Mission Sector</div>
-                        <div class="console-button-row">
-                            <button class="console-btn selected" data-sector="0">SEC 01</button>
-                            <button class="console-btn" data-sector="1">SEC 02</button>
-                            <button class="console-btn" data-sector="2">SEC 03</button>
+                        <div class="console-label">Select Vault Sector (1-6)</div>
+                        <div class="console-button-row" style="grid-template-columns: repeat(3, 1fr);">
+                            <button class="console-btn selected" data-sector="0">L1 RUINS</button>
+                            <button class="console-btn" data-sector="1">L2 HALLS</button>
+                            <button class="console-btn" data-sector="2">L3 CAVERNS</button>
+                            <button class="console-btn" data-sector="3">L4 FORTRESS</button>
+                            <button class="console-btn" data-sector="4">L5 TEMPLE</button>
+                            <button class="console-btn" data-sector="5">L6 VAULT</button>
                         </div>
                     </div>
 
                     <div>
-                        <div class="console-label">Threat Calibration</div>
+                        <div class="console-label">Rival Threat Calibration</div>
                         <div class="console-button-row" style="grid-template-columns: repeat(4, 1fr);">
-                            <button class="console-btn" data-diff="0">SCOUT</button>
-                            <button class="console-btn selected" data-diff="1">TACT</button>
-                            <button class="console-btn" data-diff="2">WAR</button>
-                            <button class="console-btn" data-diff="3">HIVE</button>
+                            <button class="console-btn" data-diff="0" title="1 AI Rival, relaxed timer">SQUIRE</button>
+                            <button class="console-btn selected" data-diff="1" title="2 AI Rivals, balanced utility">KNIGHT</button>
+                            <button class="console-btn" data-diff="2" title="3 AI Rivals, aggressive utility">CHAMPION</button>
+                            <button class="console-btn" data-diff="3" title="4 AI Rivals, master-tier speed">SOVEREIGN</button>
                         </div>
                     </div>
 
-                    <button class="action-launch-btn" id="consoleLaunchBtn">DEPLOY SECTOR RUN</button>
-                    <button class="console-btn" id="consoleRestartBtn">RESTART CURRENT RUN (R)</button>
+                    <button class="action-launch-btn" id="consoleLaunchBtn">ENTER ROYAL EXPEDITION</button>
+                    <button class="console-btn" id="consoleRestartBtn">RESTART LEVEL (R)</button>
                 </div>
             </article>
         </section>
@@ -195,31 +199,35 @@
     <div class="modal-overlay" id="guideModal">
         <div class="modal-card">
             <div class="modal-header">
-                <h2 style="font-family: var(--font-display); font-size: 1.3rem;">OPERATOR MANUAL</h2>
+                <h2>ROYAL EXPEDITION MANUAL</h2>
                 <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
             </div>
             <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88rem; color: var(--text-muted);">
-                <p><strong style="color: #fff;">Objective:</strong> Collect treasures across ancient dungeon ruins before the autonomous AI agents strip them. Reach the target score quota to illuminate the exit beacon, then escape!</p>
+                <p><strong style="color: #FFF;">Objective:</strong> Enter ancient royal vaults and gather priceless relics before autonomous AI rivals claim them. Fulfill the target quota score to ignite the exit portal beacon, then extract before time expires!</p>
                 
-                <div style="background: rgba(2, 6, 23, 0.5); padding: 12px; border-radius: 8px; border: 1px solid var(--border-glass);">
-                    <div style="color: var(--cyan); font-weight: 600; margin-bottom: 6px;">FLIGHT CONTROLS</div>
+                <div style="background: rgba(11, 10, 14, 0.7); padding: 12px; border-radius: 8px; border: 1px solid var(--border-gold);">
+                    <div style="color: var(--pale-gold); font-weight: 700; margin-bottom: 6px; font-family: var(--font-royal);">EXPEDITION CONTROLS</div>
                     <ul style="list-style: none; display: flex; flex-direction: column; gap: 4px;">
-                        <li><span style="color: #fff; font-family: var(--font-mono);">WASD / Arrows</span> — Move operative</li>
-                        <li><span style="color: #fff; font-family: var(--font-mono);">P / ESC</span> — Pause simulation</li>
-                        <li><span style="color: #fff; font-family: var(--font-mono);">R</span> — Instant restart current sector</li>
-                        <li><span style="color: #fff; font-family: var(--font-mono);">M</span> — Toggle procedural audio synthesizer</li>
-                        <li><span style="color: #fff; font-family: var(--font-mono);">F1</span> — Toggle real-time A* path & sensory mesh</li>
+                        <li><span style="color: #FFF; font-family: var(--font-mono);">W A S D / Arrows</span> &mdash; Move player</li>
+                        <li><span style="color: #FFF; font-family: var(--font-mono);">P / ESC</span> &mdash; Pause simulation</li>
+                        <li><span style="color: #FFF; font-family: var(--font-mono);">R</span> &mdash; Restart current vault run</li>
+                        <li><span style="color: #FFF; font-family: var(--font-mono);">M</span> &mdash; Toggle procedural acoustic audio</li>
+                        <li><span style="color: #FFF; font-family: var(--font-mono);">F1</span> &mdash; Toggle live A* path & sensory debug mesh</li>
                     </ul>
                 </div>
 
-                <div style="background: rgba(2, 6, 23, 0.5); padding: 12px; border-radius: 8px; border: 1px solid var(--border-glass);">
-                    <div style="color: var(--emerald); font-weight: 600; margin-bottom: 6px;">RELIC VALUES</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-family: var(--font-mono); font-size: 0.8rem;">
-                        <span style="color: var(--amber);">â—† Gold Coin: 10 PTS</span>
-                        <span style="color: var(--cyan);">â—† Sapphire: 25 PTS</span>
-                        <span style="color: var(--rose);">â—† Ruby Gem: 50 PTS</span>
-                        <span style="color: var(--purple);">â—† Relic Core: 100 PTS</span>
+                <div style="background: rgba(11, 10, 14, 0.7); padding: 12px; border-radius: 8px; border: 1px solid var(--border-gold);">
+                    <div style="color: var(--emerald); font-weight: 700; margin-bottom: 6px; font-family: var(--font-royal);">ROYAL RELIC VALUATION</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-family: var(--font-mono); font-size: 0.82rem;">
+                        <span style="color: var(--antique-gold);">&#9670; Ancient Coin: 10 PTS</span>
+                        <span style="color: var(--pale-gold);">&#9670; Gilded Ingot: 25 PTS</span>
+                        <span style="color: #6EE7B7;">&#9670; Royal Emerald: 50 PTS</span>
+                        <span style="color: #D4AF37;">&#9670; Imperial Crown: 100 PTS</span>
                     </div>
+                </div>
+
+                <div style="font-size: 0.78rem; color: var(--stone-muted); text-align: center;">
+                    Academic Context: Design of AI Products (21AIC402T), Unit 3 &bull; Viva Ready
                 </div>
             </div>
         </div>
@@ -259,7 +267,7 @@
             }
         });
 
-        // Scanlines Toggle
+        // Scanlines / Vignette Toggle
         scanlineBtn.addEventListener('click', () => {
             scanlineOverlay.classList.toggle('active');
             scanlineBtn.classList.toggle('active');
@@ -330,19 +338,27 @@
             }
         });
 
+        // Royal Personas
+        const rivalPersonas = [
+            { name: 'LORD ALISTAIR', color: '#E05252' },
+            { name: 'LADY VIVIENNE', color: '#3895D3' },
+            { name: 'SIR ROWAN', color: '#10B981' },
+            { name: 'CORVUS THE ROGUE', color: '#9B5DE5' }
+        ];
+
         // Live Bento Telemetry Polling Loop (10Hz)
         setInterval(() => {
             if (!window.game || !window.game.entityManager) return;
             const agents = window.game.entityManager.aiAgents || [];
             
             if (agentCountPill) {
-                agentCountPill.textContent = `${agents.length} DRONES ACTIVE`;
+                agentCountPill.textContent = `${agents.length} RIVAL${agents.length === 1 ? '' : 'S'} ACTIVE`;
             }
 
             if (agents.length === 0) {
                 agentFeed.innerHTML = `
-                    <div style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 14px;">
-                        Simulation standby. Deploy a sector run to activate autonomous agents.
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 16px;">
+                        Vault gates sealed. Enter an expedition sector to awaken rival hunters.
                     </div>
                 `;
                 return;
@@ -351,27 +367,24 @@
             let html = '';
             for (let i = 0; i < agents.length; i++) {
                 const a = agents[i];
+                const persona = rivalPersonas[i % rivalPersonas.length];
                 const state = a.stateMachine?.currentState?.toUpperCase() || 'SCAN';
-                const targetType = a.currentTarget?.type ? a.currentTarget.type.toUpperCase() : 'SEARCH';
+                const targetType = a.currentTarget?.type ? a.currentTarget.type.toUpperCase() : 'SEEKING';
                 const utility = a.utilityScore ? a.utilityScore.toFixed(1) : '0.0';
                 const score = a.score || 0;
-                
-                let stateColor = '#38BDF8';
-                if (state === 'PURSUING' || state === 'MOVING') stateColor = '#F59E0B';
-                if (state === 'COLLECTING') stateColor = '#10B981';
 
                 html += `
                     <div class="agent-row">
                         <div class="agent-info">
-                            <span class="agent-dot" style="background: ${stateColor}; box-shadow: 0 0 8px ${stateColor};"></span>
+                            <span class="agent-dot" style="background: ${persona.color}; box-shadow: 0 0 8px ${persona.color};"></span>
                             <div>
-                                <div class="agent-name">DRONE ${a.agentId || (i + 1)}</div>
-                                <span class="agent-state-badge" style="color: ${stateColor};">${state}</span>
+                                <div class="agent-name">${persona.name}</div>
+                                <span class="agent-state-badge" style="color: ${persona.color};">${state}</span>
                             </div>
                         </div>
                         <div class="agent-metrics">
                             <div class="agent-target">${targetType} (U: ${utility})</div>
-                            <div class="agent-score">SCORE: ${score} PTS</div>
+                            <div class="agent-score">${score} PTS</div>
                         </div>
                     </div>
                 `;

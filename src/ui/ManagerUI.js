@@ -1,26 +1,29 @@
-// UI manager - handles all UI screens and user interface
+// =========================================================================
+// AI Treasure Hunter: Royal Artifact Edition — Canvas UI Manager
+// Implements: Main Menu, Difficulty Select, 6-Level Gallery,
+// AI Viva Compendium, Tutorial Manual, Pause, Results & Gilded HUD
+// =========================================================================
+
 import { sound } from '../utils/AudioSystem.js';
+import { levels } from '../maps/levels.js';
 
 export class UIManager {
     constructor() {
-        // Current UI state
         this.currentScreen = null;
-        this.screens = {}; // screenName -> screenObject
+        this.screens = {};
         
-        // UI state data
+        // UI State
         this.menuSelection = 0;
-        this.difficultySelection = 1; // Medium by default
+        this.difficultySelection = 1; // Knight (Medium) by default
         this.levelSelection = 0;
         this.countdownValue = 3;
         this.countdownTimer = 0;
         this.isCountdownActive = false;
         this.lastInputTime = 0;
         
-        // Initialize screens
         this._initializeScreens();
     }
     
-    // Initialize all UI screens
     _initializeScreens() {
         this.screens.menu = new MenuScreen(this);
         this.screens.difficultySelect = new DifficultySelectScreen(this);
@@ -31,11 +34,9 @@ export class UIManager {
         this.screens.levelResults = new LevelResultsScreen(this);
         this.screens.gameComplete = new GameCompleteScreen(this);
         
-        // Set default screen
         this.currentScreen = this.screens.menu;
     }
     
-    // Update UI state
     update(deltaTime, inputManager) {
         if (this.currentScreen && typeof this.currentScreen.update === 'function') {
             this.currentScreen.update(deltaTime, inputManager);
@@ -46,7 +47,6 @@ export class UIManager {
         }
     }
     
-    // Render UI
     render(ctx, canvasWidth, canvasHeight) {
         if (this.currentScreen && typeof this.currentScreen.render === 'function') {
             this.currentScreen.render(ctx, canvasWidth, canvasHeight);
@@ -57,12 +57,10 @@ export class UIManager {
         }
     }
     
-    // Render HUD (during gameplay)
     renderHUD(ctx, canvasWidth, canvasHeight, gameState) {
         this._renderBasicHUD(ctx, canvasWidth, canvasHeight, gameState);
     }
     
-    // Show a specific screen
     showScreen(screenName) {
         const screen = this.screens[screenName];
         if (screen) {
@@ -114,8 +112,11 @@ export class UIManager {
     }
     
     setSelectedLevel(index) {
-        this.levelSelection = index;
-        return true;
+        if (index >= 0 && index < levels.length) {
+            this.levelSelection = index;
+            return true;
+        }
+        return false;
     }
     
     startCountdown() {
@@ -141,37 +142,38 @@ export class UIManager {
     
     _renderCountdown(ctx, canvasWidth, canvasHeight) {
         ctx.save();
-        ctx.fillStyle = 'rgba(10, 14, 23, 0.75)';
+        ctx.fillStyle = 'rgba(11, 10, 14, 0.82)';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
         const cx = canvasWidth / 2;
         const cy = canvasHeight / 2;
         const pulse = 1 + Math.sin(Date.now() * 0.008) * 0.05;
         
-        ctx.strokeStyle = '#38BDF8';
+        ctx.strokeStyle = '#D4AF37';
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.arc(cx, cy, 70 * pulse, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 75 * pulse, 0, Math.PI * 2);
         ctx.stroke();
         
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
         if (this.countdownValue > 0) {
-            ctx.font = 'bold 72px "Outfit", "Space Grotesk", sans-serif';
-            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 76px "Cinzel", "Outfit", serif';
+            ctx.fillStyle = '#FFF1D0';
             ctx.fillText(this.countdownValue, cx, cy);
             ctx.font = '600 14px "Space Grotesk", monospace';
-            ctx.fillStyle = '#38BDF8';
-            ctx.fillText('INITIALIZING AGENTS...', cx, cy + 50);
+            ctx.fillStyle = '#C6A15B';
+            ctx.fillText('UNSEALING VAULT GATES...', cx, cy + 55);
         } else {
-            ctx.font = 'bold 64px "Outfit", "Space Grotesk", sans-serif';
+            ctx.font = 'bold 64px "Cinzel", "Outfit", serif';
             ctx.fillStyle = '#10B981';
-            ctx.fillText('ENGAGE!', cx, cy);
+            ctx.fillText('CLAIM THE GLORY!', cx, cy);
         }
         ctx.restore();
     }
     
+    // In-game Royal HUD Banner
     _renderBasicHUD(ctx, canvasWidth, canvasHeight, gameState = {}) {
         ctx.save();
         
@@ -181,54 +183,57 @@ export class UIManager {
         const targetScore = level.targetScore || 80;
         const playerScore = player ? player.score : 0;
         const isUnlocked = playerScore >= targetScore;
-        const diffName = this.getSelectedDifficulty().toUpperCase();
+        const diffIndex = this.difficultySelection;
+        const diffRanks = ['SQUIRE', 'KNIGHT', 'CHAMPION', 'SOVEREIGN'];
+        const diffColors = ['#3895D3', '#10B981', '#C6A15B', '#E05252'];
+        const diffRankName = diffRanks[diffIndex] || 'KNIGHT';
+        const diffColor = diffColors[diffIndex] || '#10B981';
         
-        // 1. Top Glass Header Bar
-        const barH = 54;
-        const grad = ctx.createLinearGradient(0, 0, 0, barH + 10);
-        grad.addColorStop(0, 'rgba(11, 15, 25, 0.92)');
-        grad.addColorStop(1, 'rgba(11, 15, 25, 0.7)');
+        // 1. Top Gilded Glass Header Bar
+        const barH = 56;
+        const grad = ctx.createLinearGradient(0, 0, 0, barH);
+        grad.addColorStop(0, 'rgba(14, 12, 19, 0.95)');
+        grad.addColorStop(1, 'rgba(20, 17, 27, 0.85)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvasWidth, barH);
         
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.2)';
-        ctx.lineWidth = 1;
+        // Fine Gilded Divider
+        ctx.strokeStyle = 'rgba(198, 161, 91, 0.35)';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(0, barH);
         ctx.lineTo(canvasWidth, barH);
         ctx.stroke();
         
-        // Left: Sector & Difficulty Tag
+        // Left: Vault Sector & Threat Tag
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 16px "Outfit", "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#F8FAFC';
-        const levelTitle = level.name ? `SECTOR ${level.number || this.getSelectedLevel()} \u00B7 ${level.name.toUpperCase()}` : `SECTOR ${this.getSelectedLevel()}`;
-        ctx.fillText(levelTitle, 20, 20);
-        
-        let diffColor = '#38BDF8';
-        if (diffName === 'MEDIUM') diffColor = '#10B981';
-        if (diffName === 'HARD') diffColor = '#F59E0B';
-        if (diffName === 'EXTREME') diffColor = '#EF4444';
+        ctx.font = 'bold 16px "Cinzel", serif';
+        ctx.fillStyle = '#FFF1D0';
+        const levelTitle = level.name ? `VAULT ${level.number || this.getSelectedLevel()} \u00B7 ${level.name.toUpperCase()}` : `VAULT ${this.getSelectedLevel()}`;
+        ctx.fillText(levelTitle, 22, 21);
         
         ctx.font = '600 11px "Space Grotesk", monospace';
         ctx.fillStyle = diffColor;
-        ctx.fillText(`THREAT: ${diffName}`, 20, 38);
+        ctx.fillText(`THREAT RANK: ${diffRankName}`, 22, 40);
         
-        // Center: Target Progress Bar & Exit Beacon Alert
-        const barW = 280;
+        // Center: Quota Progress Bar & Exit Beacon Alert
+        const barW = 300;
         const barX = (canvasWidth - barW) / 2;
         const barY = 16;
         const progress = Math.min(1, playerScore / targetScore);
         
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
         this._roundRect(ctx, barX, barY, barW, 14, 7);
         ctx.fill();
+        ctx.strokeStyle = 'rgba(198, 161, 91, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
         
         if (progress > 0) {
             const fillGrad = ctx.createLinearGradient(barX, 0, barX + barW * progress, 0);
-            fillGrad.addColorStop(0, '#38BDF8');
-            fillGrad.addColorStop(1, isUnlocked ? '#10B981' : '#F59E0B');
+            fillGrad.addColorStop(0, '#C6A15B');
+            fillGrad.addColorStop(1, isUnlocked ? '#10B981' : '#D4AF37');
             ctx.fillStyle = fillGrad;
             this._roundRect(ctx, barX, barY, Math.max(14, barW * progress), 14, 7);
             ctx.fill();
@@ -239,18 +244,18 @@ export class UIManager {
         if (isUnlocked) {
             const pulse = 0.7 + Math.sin(Date.now() * 0.01) * 0.3;
             ctx.fillStyle = `rgba(16, 185, 129, ${pulse})`;
-            ctx.fillText(`\u2713 EXIT PORTAL ACTIVE \u00B7 HEAD TO BEACON!`, canvasWidth / 2, 42);
+            ctx.fillText(`\u2713 BEACON IGNITED \u00B7 HEAD TO EXIT PORTAL!`, canvasWidth / 2, 42);
         } else {
-            ctx.fillStyle = '#94A3B8';
+            ctx.fillStyle = '#E8D5A1';
             ctx.fillText(`QUOTA: ${playerScore} / ${targetScore} PTS (${Math.floor(progress * 100)}%)`, canvasWidth / 2, 42);
         }
         
-        // Right: Real-time Leaderboard Deck
-        const rightX = canvasWidth - 20;
+        // Right: Real-time Rival Standings Deck
+        const rightX = canvasWidth - 22;
         ctx.textAlign = 'right';
-        ctx.font = 'bold 15px "Outfit", sans-serif';
-        ctx.fillStyle = '#38BDF8';
-        ctx.fillText(`YOU: ${playerScore} PTS`, rightX, 20);
+        ctx.font = 'bold 15px "Cinzel", serif';
+        ctx.fillStyle = '#D4AF37';
+        ctx.fillText(`YOU: ${playerScore} PTS`, rightX, 21);
         
         let topAI = null;
         for (const ai of aiAgents) {
@@ -258,18 +263,20 @@ export class UIManager {
         }
         ctx.font = '500 12px "Space Grotesk", monospace';
         if (topAI) {
-            ctx.fillStyle = '#F43F5E';
-            ctx.fillText(`DRONE ${topAI.agentId || 1}: ${topAI.score} PTS`, rightX, 38);
+            const personas = ['LORD ALISTAIR', 'LADY VIVIENNE', 'SIR ROWAN', 'CORVUS'];
+            const personaName = personas[(topAI.agentId - 1) % personas.length] || `RIVAL ${topAI.agentId}`;
+            ctx.fillStyle = '#E05252';
+            ctx.fillText(`${personaName}: ${topAI.score} PTS`, rightX, 40);
         } else {
-            ctx.fillStyle = '#64748B';
-            ctx.fillText(`AGENTS: 0`, rightX, 38);
+            ctx.fillStyle = '#89818A';
+            ctx.fillText(`RIVALS: 0`, rightX, 40);
         }
         
-        // Bottom: Micro Controls Ribbon
+        // Bottom Ribbon: Controls
         ctx.textAlign = 'center';
         ctx.font = '500 11px "Space Grotesk", monospace';
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.75)';
-        ctx.fillText('WASD: MOVE \u00B7 P: PAUSE \u00B7 R: RESTART \u00B7 M: AUDIO \u00B7 F1: NEURAL HUD', canvasWidth / 2, canvasHeight - 14);
+        ctx.fillStyle = 'rgba(232, 213, 161, 0.7)';
+        ctx.fillText('WASD: MOVE \u00B7 P: PAUSE \u00B7 R: RESTART \u00B7 M: AUDIO \u00B7 F1: AI MESH', canvasWidth / 2, canvasHeight - 14);
         
         ctx.restore();
     }
@@ -295,7 +302,7 @@ export class UIManager {
     
     handleInput(inputManager) {
         const now = Date.now();
-        if (now - this.lastInputTime < 140) {
+        if (now - this.lastInputTime < 130) {
             return false;
         }
         
@@ -313,7 +320,7 @@ export class UIManager {
 }
 
 // -------------------------------------------------------------------------
-// Base UI Screen
+// Base Royal Screen
 // -------------------------------------------------------------------------
 class UIScreen {
     constructor(uiManager) {
@@ -339,18 +346,21 @@ class UIScreen {
     
     _renderBackdrop(ctx, w, h) {
         ctx.save();
-        const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 50, w / 2, h / 2, Math.max(w, h));
-        bgGrad.addColorStop(0, '#0F172A');
-        bgGrad.addColorStop(0.7, '#090D16');
-        bgGrad.addColorStop(1, '#05070B');
+        
+        // Deep obsidian to royal purple gradient
+        const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 60, w / 2, h / 2, Math.max(w, h));
+        bgGrad.addColorStop(0, '#191224');
+        bgGrad.addColorStop(0.65, '#0E0C13');
+        bgGrad.addColorStop(1, '#070609');
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, w, h);
         
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.04)';
+        // Subtle antique gold grid filigree
+        ctx.strokeStyle = 'rgba(198, 161, 91, 0.04)';
         ctx.lineWidth = 1;
-        const gridSize = 48;
-        const offsetX = (this.time * 8) % gridSize;
-        const offsetY = (this.time * 8) % gridSize;
+        const gridSize = 54;
+        const offsetX = (this.time * 6) % gridSize;
+        const offsetY = (this.time * 6) % gridSize;
         
         ctx.beginPath();
         for (let x = -gridSize + offsetX; x < w + gridSize; x += gridSize) {
@@ -363,17 +373,31 @@ class UIScreen {
         }
         ctx.stroke();
         
-        const g1 = ctx.createRadialGradient(w * 0.2, h * 0.25, 10, w * 0.2, h * 0.25, 240);
-        g1.addColorStop(0, 'rgba(56, 189, 248, 0.09)');
-        g1.addColorStop(1, 'rgba(56, 189, 248, 0)');
+        // Ambient gilded radial lights
+        const g1 = ctx.createRadialGradient(w * 0.2, h * 0.25, 10, w * 0.2, h * 0.25, 260);
+        g1.addColorStop(0, 'rgba(198, 161, 91, 0.08)');
+        g1.addColorStop(1, 'rgba(198, 161, 91, 0)');
         ctx.fillStyle = g1;
         ctx.fillRect(0, 0, w, h);
         
-        const g2 = ctx.createRadialGradient(w * 0.8, h * 0.75, 10, w * 0.8, h * 0.75, 260);
-        g2.addColorStop(0, 'rgba(139, 92, 246, 0.08)');
-        g2.addColorStop(1, 'rgba(139, 92, 246, 0)');
+        const g2 = ctx.createRadialGradient(w * 0.8, h * 0.75, 10, w * 0.8, h * 0.75, 280);
+        g2.addColorStop(0, 'rgba(40, 26, 56, 0.25)');
+        g2.addColorStop(1, 'rgba(40, 26, 56, 0)');
         ctx.fillStyle = g2;
         ctx.fillRect(0, 0, w, h);
+        
+        // Gilded Ornate Corner Borders
+        ctx.strokeStyle = 'rgba(198, 161, 91, 0.3)';
+        ctx.lineWidth = 2;
+        const cLen = 28;
+        // Top Left
+        ctx.beginPath(); ctx.moveTo(14, 14 + cLen); ctx.lineTo(14, 14); ctx.lineTo(14 + cLen, 14); ctx.stroke();
+        // Top Right
+        ctx.beginPath(); ctx.moveTo(w - 14 - cLen, 14); ctx.lineTo(w - 14, 14); ctx.lineTo(w - 14, 14 + cLen); ctx.stroke();
+        // Bottom Left
+        ctx.beginPath(); ctx.moveTo(14, h - 14 - cLen); ctx.lineTo(14, h - 14); ctx.lineTo(14 + cLen, h - 14); ctx.stroke();
+        // Bottom Right
+        ctx.beginPath(); ctx.moveTo(w - 14 - cLen, h - 14); ctx.lineTo(w - 14, h - 14); ctx.lineTo(w - 14, h - 14 - cLen); ctx.stroke();
         
         ctx.restore();
     }
@@ -399,18 +423,18 @@ class UIScreen {
 }
 
 // -------------------------------------------------------------------------
-// 1. Menu Screen
+// 1. Menu Screen — Royal Artifact Edition
 // -------------------------------------------------------------------------
 class MenuScreen extends UIScreen {
     constructor(uiManager) {
         super(uiManager);
         this.selectedIndex = 0;
         this.items = [
-            { id: 'play', title: 'DEPLOY OPERATIVE', subtitle: 'Enter active sector against autonomous agents' },
-            { id: 'difficulty', title: 'DIFFICULTY MATRIX', subtitle: 'Configure drone heuristic aggression & count' },
-            { id: 'levels', title: 'MISSION SECTORS', subtitle: 'Select dungeon sector and target quotas' },
-            { id: 'ai', title: 'HOW AI WORKS', subtitle: 'Interactive deep-dive into A* & Utility algorithms' },
-            { id: 'tutorial', title: 'OPERATOR MANUAL', subtitle: 'Review flight controls & scoring breakdown' }
+            { id: 'play', title: 'ENTER ROYAL EXPEDITION', subtitle: 'Descend into ancient vaults against autonomous rivals' },
+            { id: 'difficulty', title: 'RIVAL THREAT MATRIX', subtitle: 'Calibrate rival hunter speed, perception & aggression' },
+            { id: 'levels', title: 'IMPERIAL VAULT GALLERY', subtitle: 'Select from 6 handcrafted dungeon sectors' },
+            { id: 'ai', title: 'HOW AI OPERATES', subtitle: 'Interactive academic compendium: A*, Utility & Kinematics' },
+            { id: 'tutorial', title: 'EXPEDITION ARCHIVES', subtitle: 'Operator manual, controls & relic scoring manifest' }
         ];
     }
     
@@ -458,29 +482,29 @@ class MenuScreen extends UIScreen {
         
         const cx = canvasWidth / 2;
         
-        // Brand Header Badge
+        // Royal Badge
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = '600 12px "Space Grotesk", monospace';
-        ctx.fillStyle = '#38BDF8';
-        ctx.fillText('\u25C6  AUTONOMOUS MULTI-AGENT ARENA  \u25C6', cx, 52);
+        ctx.fillStyle = '#C6A15B';
+        ctx.fillText('\u25C6  ROYAL ARTIFACT EDITION \u2014 UNIT 3 AI IN GAMING  \u25C6', cx, 50);
         
-        // Title with glowing gradient
-        ctx.font = 'bold 44px "Outfit", "Space Grotesk", sans-serif';
-        const titleGrad = ctx.createLinearGradient(cx - 200, 0, cx + 200, 0);
-        titleGrad.addColorStop(0, '#FFFFFF');
-        titleGrad.addColorStop(0.5, '#E2E8F0');
-        titleGrad.addColorStop(1, '#38BDF8');
+        // Imperial Title
+        ctx.font = 'bold 44px "Cinzel", "Outfit", serif';
+        const titleGrad = ctx.createLinearGradient(cx - 240, 0, cx + 240, 0);
+        titleGrad.addColorStop(0, '#FFF1D0');
+        titleGrad.addColorStop(0.5, '#D4AF37');
+        titleGrad.addColorStop(1, '#C6A15B');
         ctx.fillStyle = titleGrad;
         ctx.fillText('AI TREASURE HUNTER', cx, 96);
         
-        // Subtitle
-        ctx.font = '400 14px "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText('High-stakes algorithmic competition against autonomous heuristic drones', cx, 134);
+        // Royal Subtitle
+        ctx.font = '500 13px "Space Grotesk", sans-serif';
+        ctx.fillStyle = '#A39B97';
+        ctx.fillText('High-stakes multi-agent competition within the gilded subterranean vaults', cx, 134);
         
         // Menu Cards
-        const cardW = 540;
+        const cardW = 560;
         const cardH = 58;
         const startY = 175;
         const gap = 14;
@@ -490,41 +514,41 @@ class MenuScreen extends UIScreen {
             const y = startY + i * (cardH + gap);
             const isSelected = i === this.selectedIndex;
             
-            ctx.fillStyle = isSelected ? 'rgba(56, 189, 248, 0.14)' : 'rgba(15, 23, 42, 0.65)';
+            ctx.fillStyle = isSelected ? 'rgba(40, 26, 56, 0.75)' : 'rgba(20, 17, 27, 0.75)';
             this._roundRect(ctx, cx - cardW / 2, y, cardW, cardH, 10);
             ctx.fill();
             
-            ctx.strokeStyle = isSelected ? '#38BDF8' : 'rgba(148, 163, 184, 0.15)';
+            ctx.strokeStyle = isSelected ? '#D4AF37' : 'rgba(198, 161, 91, 0.2)';
             ctx.lineWidth = isSelected ? 2 : 1;
             ctx.stroke();
             
             if (isSelected) {
-                ctx.fillStyle = '#38BDF8';
+                ctx.fillStyle = '#D4AF37';
                 this._roundRect(ctx, cx - cardW / 2 + 10, y + 14, 4, cardH - 28, 2);
                 ctx.fill();
             }
             
             ctx.textAlign = 'left';
-            ctx.font = isSelected ? 'bold 17px "Outfit", sans-serif' : '600 16px "Outfit", sans-serif';
-            ctx.fillStyle = isSelected ? '#FFFFFF' : '#CBD5E1';
+            ctx.font = isSelected ? 'bold 16px "Cinzel", serif' : '600 15px "Cinzel", serif';
+            ctx.fillStyle = isSelected ? '#FFF1D0' : '#D1C7B7';
             ctx.fillText(item.title, cx - cardW / 2 + 28, y + 22);
             
             ctx.font = '400 12px "Space Grotesk", sans-serif';
-            ctx.fillStyle = isSelected ? '#93C5FD' : '#64748B';
+            ctx.fillStyle = isSelected ? '#E8D5A1' : '#89818A';
             ctx.fillText(item.subtitle, cx - cardW / 2 + 28, y + 42);
             
             if (isSelected) {
                 ctx.textAlign = 'right';
-                ctx.font = 'bold 18px "Space Grotesk", sans-serif';
-                ctx.fillStyle = '#38BDF8';
+                ctx.font = 'bold 18px "Cinzel", serif';
+                ctx.fillStyle = '#D4AF37';
                 ctx.fillText('\u2192', cx + cardW / 2 - 20, y + cardH / 2);
             }
         }
         
         ctx.textAlign = 'center';
         ctx.font = '500 12px "Space Grotesk", monospace';
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
-        ctx.fillText('\u2191 / \u2193 NAVIGATE \u00B7 ENTER / SPACE CONFIRM \u00B7 M MUTE', cx, canvasHeight - 28);
+        ctx.fillStyle = 'rgba(232, 213, 161, 0.65)';
+        ctx.fillText('\u2191 / \u2193 NAVIGATE \u00B7 ENTER / SPACE CONFIRM \u00B7 M MUTE', cx, canvasHeight - 26);
         
         ctx.restore();
     }
@@ -535,7 +559,7 @@ class MenuScreen extends UIScreen {
 }
 
 // -------------------------------------------------------------------------
-// 2. Difficulty Select Screen
+// 2. Difficulty Select Screen — 4 Royal Tiers
 // -------------------------------------------------------------------------
 class DifficultySelectScreen extends UIScreen {
     constructor(uiManager) {
@@ -543,40 +567,40 @@ class DifficultySelectScreen extends UIScreen {
         this.selectedIndex = this.uiManager.difficultySelection || 1;
         this.options = [
             {
-                title: 'SCOUT',
+                title: 'SQUIRE',
                 tag: 'EASY',
-                color: '#38BDF8',
-                drones: '1 Drone',
-                speed: 'Normal (105 px/s)',
-                heuristic: 'Basic Utility',
-                desc: 'Balanced intro. Drone explores conservatively, giving you ample room to gather relics.'
+                color: '#3895D3',
+                rivals: '1 AI Rival',
+                speed: '90 px/s (350ms tick)',
+                perception: '9 Tiles Perception',
+                desc: 'Courteous adversary. AI favors safe distant relics, allowing ample time to learn the vault layout.'
             },
             {
-                title: 'TACTICIAN',
-                tag: 'BALANCED',
+                title: 'KNIGHT',
+                tag: 'MEDIUM',
                 color: '#10B981',
-                drones: '2 Drones',
-                speed: 'Fast (125 px/s)',
-                heuristic: 'Adaptive A*',
-                desc: 'Contested arena. Two intelligent drones actively evaluate treasure payoff vs travel distance.'
+                rivals: '2 AI Rivals',
+                speed: '110 px/s (250ms tick)',
+                perception: '11 Tiles Perception',
+                desc: 'Standard contest. Competitors deploy balanced utility weighting and basic target reservation.'
             },
             {
-                title: 'WARLORD',
-                tag: 'AGGRESSIVE',
-                color: '#F59E0B',
-                drones: '3 Drones',
-                speed: 'High (140 px/s)',
-                heuristic: 'Greedy Heuristic',
-                desc: 'Ruthless pressure. AI prioritizes rare gems and cuts off choke points with tight navigation.'
+                title: 'CHAMPION',
+                tag: 'HARD',
+                color: '#C6A15B',
+                rivals: '3 AI Rivals',
+                speed: '125 px/s (180ms tick)',
+                perception: '14 Tiles Perception',
+                desc: 'Aggressive rivals. Agents actively monitor competitor distance and dynamically steal high-value targets.'
             },
             {
-                title: 'HIVE MIND',
+                title: 'SOVEREIGN',
                 tag: 'EXTREME',
-                color: '#EF4444',
-                drones: '4 Drones',
-                speed: 'Overclocked (160 px/s)',
-                heuristic: 'Optimal Saturation',
-                desc: 'Maximum challenge. 4 synchronized drones strip the dungeon clean with near-zero hesitation.'
+                color: '#E05252',
+                rivals: '4 AI Rivals',
+                speed: '140 px/s (140ms tick)',
+                perception: '18 Tiles Perception',
+                desc: 'Apex challenge. 4 synchronized competitors strip the vaults bare with rapid replanning and minimal hesitation.'
             }
         ];
     }
@@ -604,10 +628,10 @@ class DifficultySelectScreen extends UIScreen {
         if (inputManager.justPressed('Enter') || inputManager.justPressed('Space')) {
             sound.playMenuSelect();
             this.uiManager.setSelectedDifficulty(this.selectedIndex);
-            this.uiManager.showScreen('levelSelect');
+            this.uiManager.showScreen('menu');
             return true;
         }
-        if (inputManager.justPressed('Escape') || inputManager.justPressed('KeyM')) {
+        if (inputManager.justPressed('Escape')) {
             sound.playMenuHover();
             this.uiManager.showScreen('menu');
             return true;
@@ -623,17 +647,17 @@ class DifficultySelectScreen extends UIScreen {
         
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 32px "Outfit", "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('SELECT DIFFICULTY MATRIX', cx, 55);
+        ctx.font = 'bold 34px "Cinzel", "Outfit", serif';
+        ctx.fillStyle = '#FFF1D0';
+        ctx.fillText('RIVAL THREAT MATRIX', cx, 56);
         
         ctx.font = '400 13px "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText('Calibrate autonomous agent density, search heuristics, and reaction velocity', cx, 88);
+        ctx.fillStyle = '#A39B97';
+        ctx.fillText('Select your difficulty to tune AI speed, reaction intervals, and perception radii', cx, 88);
         
-        const cardW = 580;
+        const cardW = 600;
         const cardH = 88;
-        const startY = 125;
+        const startY = 126;
         const gap = 16;
         
         for (let i = 0; i < this.options.length; i++) {
@@ -641,11 +665,11 @@ class DifficultySelectScreen extends UIScreen {
             const y = startY + i * (cardH + gap);
             const isSelected = i === this.selectedIndex;
             
-            ctx.fillStyle = isSelected ? 'rgba(30, 41, 59, 0.9)' : 'rgba(15, 23, 42, 0.65)';
-            this._roundRect(ctx, cx - cardW / 2, y, cardW, cardH, 12);
+            ctx.fillStyle = isSelected ? 'rgba(40, 26, 56, 0.85)' : 'rgba(20, 17, 27, 0.7)';
+            this._roundRect(ctx, cx - cardW / 2, y, cardW, cardH, 10);
             ctx.fill();
             
-            ctx.strokeStyle = isSelected ? opt.color : 'rgba(148, 163, 184, 0.15)';
+            ctx.strokeStyle = isSelected ? opt.color : 'rgba(198, 161, 91, 0.2)';
             ctx.lineWidth = isSelected ? 2 : 1;
             ctx.stroke();
             
@@ -654,20 +678,20 @@ class DifficultySelectScreen extends UIScreen {
             ctx.fill();
             
             ctx.textAlign = 'left';
-            ctx.font = 'bold 18px "Outfit", sans-serif';
-            ctx.fillStyle = isSelected ? '#FFFFFF' : '#E2E8F0';
-            ctx.fillText(opt.title, cx - cardW / 2 + 30, y + 26);
+            ctx.font = 'bold 18px "Cinzel", serif';
+            ctx.fillStyle = isSelected ? '#FFF1D0' : '#E8D5A1';
+            ctx.fillText(opt.title, cx - cardW / 2 + 30, y + 24);
             
             ctx.font = 'bold 11px "Space Grotesk", monospace';
             ctx.fillStyle = opt.color;
-            ctx.fillText(`[ ${opt.tag} ]`, cx - cardW / 2 + 130, y + 26);
+            ctx.fillText(`[ ${opt.tag} ]`, cx - cardW / 2 + 165, y + 24);
             
             ctx.font = '500 12px "Space Grotesk", monospace';
-            ctx.fillStyle = '#94A3B8';
-            ctx.fillText(`\u25C6 ${opt.drones}   \u25C6 ${opt.speed}   \u25C6 ${opt.heuristic}`, cx - cardW / 2 + 30, y + 48);
+            ctx.fillStyle = '#C6A15B';
+            ctx.fillText(`\u25C6 ${opt.rivals}   \u25C6 ${opt.speed}   \u25C6 ${opt.perception}`, cx - cardW / 2 + 30, y + 46);
             
             ctx.font = '400 12px "Space Grotesk", sans-serif';
-            ctx.fillStyle = '#64748B';
+            ctx.fillStyle = '#89818A';
             ctx.fillText(opt.desc, cx - cardW / 2 + 30, y + 68);
             
             if (isSelected) {
@@ -680,8 +704,8 @@ class DifficultySelectScreen extends UIScreen {
         
         ctx.textAlign = 'center';
         ctx.font = '500 12px "Space Grotesk", monospace';
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
-        ctx.fillText('\u2191 / \u2193 SELECT \u00B7 ENTER CONFIRM \u00B7 ESC BACK', cx, canvasHeight - 26);
+        ctx.fillStyle = 'rgba(232, 213, 161, 0.7)';
+        ctx.fillText('\u2191 / \u2193 SELECT \u00B7 ENTER CONFIRM \u00B7 ESC BACK', cx, canvasHeight - 24);
         
         ctx.restore();
     }
@@ -692,58 +716,39 @@ class DifficultySelectScreen extends UIScreen {
 }
 
 // -------------------------------------------------------------------------
-// 3. Level Select Screen
+// 3. Level Select Screen — All 6 Handcrafted Vaults
 // -------------------------------------------------------------------------
 class LevelSelectScreen extends UIScreen {
     constructor(uiManager) {
         super(uiManager);
         this.selectedIndex = this.uiManager.levelSelection || 0;
-        this.sectors = [
-            {
-                number: 1,
-                name: 'Ruins Entrance',
-                tag: 'SECTOR 01',
-                target: '80 PTS',
-                time: '90s Limit',
-                treasures: '4 High Relics',
-                desc: 'Open-air stone pavilions. Direct sightlines and broad corridors.'
-            },
-            {
-                number: 2,
-                name: 'The Sunken Crypt',
-                tag: 'SECTOR 02',
-                target: '100 PTS',
-                time: '100s Limit',
-                treasures: '6 Scattered Relics',
-                desc: 'Tight corridors and blind corners. Heavy A* path recalculation required.'
-            },
-            {
-                number: 3,
-                name: 'The Cybernetic Core',
-                tag: 'SECTOR 03',
-                target: '150 PTS',
-                time: '120s Limit',
-                treasures: '8 Dynamic Relics',
-                desc: 'Complex multi-ring vault. Severe agent contestation over legendary nodes.'
-            }
-        ];
     }
     
     update(deltaTime, inputManager) {
         super.update(deltaTime, inputManager);
         
-        if (inputManager.justPressed('ArrowDown') || inputManager.justPressed('KeyS') ||
-            inputManager.justPressed('ArrowRight') || inputManager.justPressed('KeyD')) {
-            this.selectedIndex = (this.selectedIndex + 1) % this.sectors.length;
+        // 2-column grid navigation: left/right (±1), up/down (±2)
+        if (inputManager.justPressed('ArrowRight') || inputManager.justPressed('KeyD')) {
+            this.selectedIndex = (this.selectedIndex + 1) % levels.length;
             sound.playMenuHover();
             return true;
         }
-        if (inputManager.justPressed('ArrowUp') || inputManager.justPressed('KeyW') ||
-            inputManager.justPressed('ArrowLeft') || inputManager.justPressed('KeyA')) {
-            this.selectedIndex = (this.selectedIndex - 1 + this.sectors.length) % this.sectors.length;
+        if (inputManager.justPressed('ArrowLeft') || inputManager.justPressed('KeyA')) {
+            this.selectedIndex = (this.selectedIndex - 1 + levels.length) % levels.length;
             sound.playMenuHover();
             return true;
         }
+        if (inputManager.justPressed('ArrowDown') || inputManager.justPressed('KeyS')) {
+            this.selectedIndex = (this.selectedIndex + 2) % levels.length;
+            sound.playMenuHover();
+            return true;
+        }
+        if (inputManager.justPressed('ArrowUp') || inputManager.justPressed('KeyW')) {
+            this.selectedIndex = (this.selectedIndex - 2 + levels.length) % levels.length;
+            sound.playMenuHover();
+            return true;
+        }
+        
         if (inputManager.justPressed('Enter') || inputManager.justPressed('Space')) {
             sound.playMenuSelect();
             this.uiManager.setSelectedLevel(this.selectedIndex);
@@ -769,64 +774,84 @@ class LevelSelectScreen extends UIScreen {
         
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 32px "Outfit", "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('CHOOSE MISSION SECTOR', cx, 65);
+        ctx.font = 'bold 32px "Cinzel", "Outfit", serif';
+        ctx.fillStyle = '#FFF1D0';
+        ctx.fillText('IMPERIAL VAULT EXPEDITION GALLERY', cx, 52);
         
         ctx.font = '400 13px "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText('Select your deployment arena and examine tactical target score objectives', cx, 100);
+        ctx.fillStyle = '#A39B97';
+        ctx.fillText('Browse all six handcrafted ancient dungeons & examine strategic target quotas', cx, 84);
         
-        const cardW = 560;
-        const cardH = 96;
-        const startY = 145;
-        const gap = 20;
+        // 2 columns x 3 rows of rich cards
+        const cardW = 380;
+        const cardH = 114;
+        const gapX = 24;
+        const gapY = 16;
+        const totalW = cardW * 2 + gapX;
+        const startX = cx - totalW / 2;
+        const startY = 118;
         
-        for (let i = 0; i < this.sectors.length; i++) {
-            const sec = this.sectors[i];
-            const y = startY + i * (cardH + gap);
+        for (let i = 0; i < levels.length; i++) {
+            const lvl = levels[i];
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            const x = startX + col * (cardW + gapX);
+            const y = startY + row * (cardH + gapY);
             const isSelected = i === this.selectedIndex;
+            const totalTreasureVal = lvl.treasures.reduce((s, t) => s + t.value, 0);
             
-            ctx.fillStyle = isSelected ? 'rgba(30, 41, 59, 0.92)' : 'rgba(15, 23, 42, 0.65)';
-            this._roundRect(ctx, cx - cardW / 2, y, cardW, cardH, 12);
+            ctx.fillStyle = isSelected ? 'rgba(40, 26, 56, 0.9)' : 'rgba(20, 17, 27, 0.72)';
+            this._roundRect(ctx, x, y, cardW, cardH, 12);
             ctx.fill();
             
-            ctx.strokeStyle = isSelected ? '#10B981' : 'rgba(148, 163, 184, 0.15)';
+            ctx.strokeStyle = isSelected ? '#D4AF37' : 'rgba(198, 161, 91, 0.2)';
             ctx.lineWidth = isSelected ? 2 : 1;
             ctx.stroke();
             
-            ctx.fillStyle = isSelected ? '#10B981' : '#38BDF8';
-            this._roundRect(ctx, cx - cardW / 2 + 14, y + 16, 4, cardH - 32, 2);
+            // Vertical accent bar
+            ctx.fillStyle = isSelected ? '#D4AF37' : '#C6A15B';
+            this._roundRect(ctx, x + 12, y + 14, 4, cardH - 28, 2);
             ctx.fill();
             
+            // Title
             ctx.textAlign = 'left';
-            ctx.font = 'bold 18px "Outfit", sans-serif';
-            ctx.fillStyle = isSelected ? '#FFFFFF' : '#E2E8F0';
-            ctx.fillText(`${sec.tag} \u00B7 ${sec.name}`, cx - cardW / 2 + 32, y + 28);
+            ctx.font = 'bold 16px "Cinzel", serif';
+            ctx.fillStyle = isSelected ? '#FFF1D0' : '#E8D5A1';
+            ctx.fillText(`VAULT ${lvl.number}: ${lvl.name.toUpperCase()}`, x + 26, y + 24);
             
-            ctx.font = '600 12px "Space Grotesk", monospace';
+            // Metrics row
+            ctx.font = '600 11px "Space Grotesk", monospace';
             ctx.fillStyle = '#10B981';
-            ctx.fillText(`QUOTA: ${sec.target}`, cx - cardW / 2 + 32, y + 54);
+            ctx.fillText(`QUOTA: ${lvl.targetScore} PTS`, x + 26, y + 46);
+            
+            ctx.fillStyle = '#C6A15B';
+            ctx.fillText(`\u25C6 ${lvl.timeLimit}s LIMIT`, x + 155, y + 46);
             
             ctx.fillStyle = '#94A3B8';
-            ctx.fillText(`\u25C6 ${sec.time}   \u25C6 ${sec.treasures}`, cx - cardW / 2 + 160, y + 54);
+            ctx.fillText(`\u25C6 ${lvl.treasures.length} RELICS (${totalTreasureVal} PTS)`, x + 235, y + 46);
             
-            ctx.font = '400 12px "Space Grotesk", sans-serif';
+            // Subtitle / Description
+            ctx.font = '400 11px "Space Grotesk", sans-serif';
+            ctx.fillStyle = isSelected ? '#D1C7B7' : '#89818A';
+            const desc = lvl.subtitle || lvl.description;
+            ctx.fillText(desc.length > 52 ? desc.slice(0, 52) + '...' : desc, x + 26, y + 68);
+            
+            ctx.font = 'italic 11px "Space Grotesk", sans-serif';
             ctx.fillStyle = '#64748B';
-            ctx.fillText(sec.desc, cx - cardW / 2 + 32, y + 76);
+            ctx.fillText(`Theme: ${lvl.theme ? lvl.theme.toUpperCase() : 'STONE'} \u00B7 Grid: ${lvl.width}x${lvl.height}`, x + 26, y + 90);
             
             if (isSelected) {
                 ctx.textAlign = 'right';
-                ctx.font = 'bold 15px "Outfit", sans-serif';
-                ctx.fillStyle = '#10B981';
-                ctx.fillText('DEPLOY \u2192', cx + cardW / 2 - 24, y + cardH / 2);
+                ctx.font = 'bold 13px "Cinzel", serif';
+                ctx.fillStyle = '#D4AF37';
+                ctx.fillText('ENTER \u2192', x + cardW - 14, y + 24);
             }
         }
         
         ctx.textAlign = 'center';
         ctx.font = '500 12px "Space Grotesk", monospace';
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
-        ctx.fillText('\u2191 / \u2193 SELECT \u00B7 ENTER DEPLOY MISSION \u00B7 ESC BACK', cx, canvasHeight - 28);
+        ctx.fillStyle = 'rgba(232, 213, 161, 0.7)';
+        ctx.fillText('\u2190 \u2191 \u2192 \u2193 NAVIGATE \u00B7 ENTER ENTER EXPEDITION \u00B7 ESC RETURN', cx, canvasHeight - 22);
         
         ctx.restore();
     }
@@ -837,7 +862,7 @@ class LevelSelectScreen extends UIScreen {
 }
 
 // -------------------------------------------------------------------------
-// 4. How AI Works Screen
+// 4. How AI Operates — Academic Viva Compendium
 // -------------------------------------------------------------------------
 class HowAIWorksScreen extends UIScreen {
     constructor(uiManager) {
@@ -849,39 +874,39 @@ class HowAIWorksScreen extends UIScreen {
                 header: 'Raycasting Perception Engine',
                 formula: 'Perception = { T | dist(Agent, T) <= R_sense and ClearRaycast(Agent, T) }',
                 points: [
-                    'The AI agent continuously scans its surroundings up to a radius of 300 pixels.',
-                    'Obstacles like stone walls block line-of-sight using tile raycasting.',
-                    'Treasures outside the field-of-view remain unknown until the drone moves closer.'
+                    'The AI agent continuously scans surroundings up to a radius of 9 to 18 grid tiles.',
+                    'Obstacles and dungeon walls obstruct line-of-sight using grid raycasting.',
+                    'Treasures outside the field-of-view remain unseen until the agent travels closer.'
                 ]
             },
             {
-                title: '2. UTILITY SCORING',
-                header: 'Dynamic Payoff Valuation',
-                formula: 'Utility(T) = (Value^1.2) / (Distance + 15) * ContestPenalty',
+                title: '2. UTILITY EVALUATION',
+                header: 'Multi-Factor Decision Function',
+                formula: 'U(t) = w_val\u00B7V + w_dist\u00B7D + w_risk\u00B7R + w_comp\u00B7C + w_urg\u00B7U',
                 points: [
-                    'Every spotted relic is assigned an objective utility score.',
-                    'Gems & Artifacts (50-100 pts) are weighted non-linearly over cheap 10 pt coins.',
-                    'If a competitor or player is already closer to a relic, its ContestPenalty drops drastically.'
+                    'Every candidate relic is evaluated against a 5-factor normalized payoff formula.',
+                    'Imperial crowns and gems (50-100 pts) are strategically weighted over common coins.',
+                    'Competition modelling penalizes candidates if a rival or player is closer to the target.'
                 ]
             },
             {
                 title: '3. A* PATHFINDING',
-                header: 'Grid Heuristic Navigation',
-                formula: 'f(n) = g(n) + h(n),  h(n) = |dx| + |dy| + 0.001 * tiebreaker',
+                header: 'Optimal Grid Navigation (Min-Heap)',
+                formula: 'f(n) = g(n) + h(n),  h(n) = |dx| + |dy| + 0.001 \u00B7 cross',
                 points: [
-                    'A* evaluates optimal waypoint corridors across the 20x12 tile navigation mesh.',
-                    'Heuristic h(n) uses Manhattan distance with tie-breaker cross-products to prevent zig-zags.',
-                    'When walls or doors block a corridor, the agent recalculates in under 1.2ms.'
+                    'A* evaluates optimal waypoint corridors across the 64px collision grid in <1.2ms.',
+                    'Binary Min-Heap priority queue guarantees O(log N) node extraction per cycle.',
+                    'Dynamic replanning triggers whenever another hunter claims the target relic.'
                 ]
             },
             {
-                title: '4. STEERING & AVOIDANCE',
-                header: 'Kinematic Separation & Smoothing',
-                formula: 'v_desired = Normalize(Target - Pos) * v_max;  F_steer = v_desired - v_curr',
+                title: '4. STEERING DYNAMICS',
+                header: 'Kinematic Separation & Trajectory Smoothing',
+                formula: 'F_steer = v_desired - v_curr (Seek + Arrive + Avoid)',
                 points: [
-                    'Waypoints are smoothed using continuous steering vectors instead of robotic grid snaps.',
-                    'Separation forces prevent drones from clipping through each other in narrow doorways.',
-                    'Once a treasure is consumed, the drone instantly reprioritizes its next highest utility.'
+                    'Waypoints are followed via continuous steering forces instead of jerky grid snapping.',
+                    'Separation avoidance forces prevent hunters from clipping through each other in chokepoints.',
+                    'Sliding wall collision allows smooth deflection along stone corridors without sticking.'
                 ]
             }
         ];
@@ -921,15 +946,15 @@ class HowAIWorksScreen extends UIScreen {
         
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 30px "Outfit", "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('NEURAL ARCHITECTURE SPECIFICATION', cx, 52);
+        ctx.font = 'bold 30px "Cinzel", "Outfit", serif';
+        ctx.fillStyle = '#FFF1D0';
+        ctx.fillText('ACADEMIC AI COMPENDIUM', cx, 52);
         
         ctx.font = '400 13px "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText('Autonomous multi-agent algorithmic decision-making pipeline', cx, 84);
+        ctx.fillStyle = '#A39B97';
+        ctx.fillText('Deterministic multi-agent decision theory & algorithmic viva breakdown', cx, 84);
         
-        const tabW = 140;
+        const tabW = 150;
         const totalW = tabW * 4 + 30;
         const startX = cx - totalW / 2;
         const tabY = 110;
@@ -938,59 +963,59 @@ class HowAIWorksScreen extends UIScreen {
             const tx = startX + i * (tabW + 10);
             const isSelected = i === this.tabIndex;
             
-            ctx.fillStyle = isSelected ? '#38BDF8' : 'rgba(30, 41, 59, 0.7)';
+            ctx.fillStyle = isSelected ? '#D4AF37' : 'rgba(20, 17, 27, 0.75)';
             this._roundRect(ctx, tx, tabY, tabW, 36, 8);
             ctx.fill();
             
             ctx.font = 'bold 12px "Space Grotesk", monospace';
-            ctx.fillStyle = isSelected ? '#0B0F19' : '#94A3B8';
+            ctx.fillStyle = isSelected ? '#0B0A0E' : '#C6A15B';
             ctx.textAlign = 'center';
             ctx.fillText(this.tabs[i].title, tx + tabW / 2, tabY + 18);
         }
         
         const content = this.tabs[this.tabIndex];
-        const cardW = 680;
-        const cardH = 260;
+        const cardW = 700;
+        const cardH = 265;
         const cardY = 165;
         
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.fillStyle = 'rgba(20, 17, 27, 0.9)';
         this._roundRect(ctx, cx - cardW / 2, cardY, cardW, cardH, 14);
         ctx.fill();
         
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+        ctx.strokeStyle = 'rgba(198, 161, 91, 0.35)';
         ctx.lineWidth = 1.5;
         ctx.stroke();
         
         ctx.textAlign = 'left';
-        ctx.font = 'bold 20px "Outfit", sans-serif';
-        ctx.fillStyle = '#38BDF8';
+        ctx.font = 'bold 19px "Cinzel", serif';
+        ctx.fillStyle = '#FFF1D0';
         ctx.fillText(content.header, cx - cardW / 2 + 28, cardY + 36);
         
         const fBoxW = cardW - 56;
-        ctx.fillStyle = 'rgba(2, 6, 23, 0.7)';
+        ctx.fillStyle = 'rgba(11, 10, 14, 0.7)';
         this._roundRect(ctx, cx - cardW / 2 + 28, cardY + 58, fBoxW, 44, 8);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.2)';
+        ctx.strokeStyle = 'rgba(198, 161, 91, 0.25)';
         ctx.lineWidth = 1;
         ctx.stroke();
         
         ctx.font = 'bold 13px "JetBrains Mono", monospace';
-        ctx.fillStyle = '#10B981';
+        ctx.fillStyle = '#6EE7B7';
         ctx.fillText(content.formula, cx - cardW / 2 + 42, cardY + 80);
         
-        const ptStartY = cardY + 128;
+        const ptStartY = cardY + 130;
         ctx.font = '400 14px "Space Grotesk", sans-serif';
         for (let j = 0; j < content.points.length; j++) {
             const py = ptStartY + j * 38;
-            ctx.fillStyle = '#38BDF8';
+            ctx.fillStyle = '#D4AF37';
             ctx.fillText('\u25C6', cx - cardW / 2 + 32, py);
-            ctx.fillStyle = '#CBD5E1';
+            ctx.fillStyle = '#FDFBF7';
             ctx.fillText(content.points[j], cx - cardW / 2 + 54, py);
         }
         
         ctx.textAlign = 'center';
         ctx.font = '500 12px "Space Grotesk", monospace';
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
+        ctx.fillStyle = 'rgba(232, 213, 161, 0.7)';
         ctx.fillText('\u2190 / \u2192 SWITCH TAB (OR 1-4) \u00B7 ESC / ENTER BACK TO MENU', cx, canvasHeight - 26);
         
         ctx.restore();
@@ -1002,7 +1027,7 @@ class HowAIWorksScreen extends UIScreen {
 }
 
 // -------------------------------------------------------------------------
-// 5. Operator Manual (Tutorial Screen)
+// 5. Operator Flight Manual (Tutorial Screen)
 // -------------------------------------------------------------------------
 class TutorialScreen extends UIScreen {
     update(deltaTime, inputManager) {
@@ -1023,89 +1048,89 @@ class TutorialScreen extends UIScreen {
         
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 32px "Outfit", "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('OPERATOR FLIGHT MANUAL', cx, 55);
+        ctx.font = 'bold 32px "Cinzel", "Outfit", serif';
+        ctx.fillStyle = '#FFF1D0';
+        ctx.fillText('ROYAL EXPEDITION ARCHIVES', cx, 55);
         
         ctx.font = '400 13px "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText('Core objectives, propulsion controls, and scoring mechanics', cx, 88);
+        ctx.fillStyle = '#A39B97';
+        ctx.fillText('Objective guidelines, locomotion controls, and relic valuation', cx, 88);
         
-        const colW = 320;
-        const colH = 290;
+        const colW = 330;
+        const colH = 300;
         const colY = 125;
         
         // Left Column: Controls
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.fillStyle = 'rgba(20, 17, 27, 0.85)';
         this._roundRect(ctx, cx - colW - 14, colY, colW, colH, 12);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
+        ctx.strokeStyle = 'rgba(198, 161, 91, 0.25)';
         ctx.stroke();
         
         ctx.textAlign = 'left';
-        ctx.font = 'bold 18px "Outfit", sans-serif';
-        ctx.fillStyle = '#38BDF8';
-        ctx.fillText('PILOT CONTROLS', cx - colW + 6, colY + 28);
+        ctx.font = 'bold 17px "Cinzel", serif';
+        ctx.fillStyle = '#FFF1D0';
+        ctx.fillText('OPERATOR CONTROLS', cx - colW + 6, colY + 28);
         
         const controls = [
-            { k: 'W A S D / Arrows', d: 'Omnidirectional thruster movement' },
-            { k: 'P or ESC', d: 'Pause simulation' },
-            { k: 'R', d: 'Restart current sector run' },
-            { k: 'M', d: 'Toggle procedural synthesizer audio' },
-            { k: 'F1', d: 'Toggle live neural path overlay' }
+            { k: 'W A S D / Arrows', d: 'Omnidirectional character movement' },
+            { k: 'P or ESC', d: 'Pause / Resume vault simulation' },
+            { k: 'R', d: 'Restart current vault expedition' },
+            { k: 'M', d: 'Toggle procedural acoustic synthesizer' },
+            { k: 'F1', d: 'Toggle real-time AI decision & path mesh' }
         ];
         
         for (let i = 0; i < controls.length; i++) {
-            const cy = colY + 62 + i * 42;
+            const cy = colY + 62 + i * 44;
             ctx.font = 'bold 12px "Space Grotesk", monospace';
-            ctx.fillStyle = '#F8FAFC';
+            ctx.fillStyle = '#D4AF37';
             ctx.fillText(controls[i].k, cx - colW + 6, cy);
             ctx.font = '400 12px "Space Grotesk", sans-serif';
-            ctx.fillStyle = '#94A3B8';
+            ctx.fillStyle = '#A39B97';
             ctx.fillText(controls[i].d, cx - colW + 6, cy + 18);
         }
         
         // Right Column: Relics
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.fillStyle = 'rgba(20, 17, 27, 0.85)';
         this._roundRect(ctx, cx + 14, colY, colW, colH, 12);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
+        ctx.strokeStyle = 'rgba(198, 161, 91, 0.25)';
         ctx.stroke();
         
-        ctx.font = 'bold 18px "Outfit", sans-serif';
+        ctx.font = 'bold 17px "Cinzel", serif';
         ctx.fillStyle = '#10B981';
-        ctx.fillText('RELIC MANIFEST & EXTRACTION', cx + 34, colY + 28);
+        ctx.fillText('RELIC MANIFEST & QUOTA', cx + 34, colY + 28);
         
         const relics = [
-            { t: 'Gold Coin', v: '10 PTS', c: '#F59E0B', d: 'Common baseline currency' },
-            { t: 'Sapphire Crystal', v: '25 PTS', c: '#38BDF8', d: 'High velocity value target' },
-            { t: 'Ruby Gem', v: '50 PTS', c: '#F43F5E', d: 'Prized gemstone, contested' },
-            { t: 'Celestial Relic', v: '100 PTS', c: '#A855F7', d: 'Legendary ancient core artifact' }
+            { t: 'Ancient Coin', v: '10 PTS', c: '#C6A15B', d: 'Common imperial coin with royal crest' },
+            { t: 'Gilded Ingot', v: '25 PTS', c: '#EAB308', d: 'Heavy gold bullion bar' },
+            { t: 'Royal Emerald', v: '50 PTS', c: '#10B981', d: 'Radiant cut dynastic gemstone' },
+            { t: 'Imperial Crown', v: '100 PTS', c: '#D4AF37', d: 'Legendary sovereign coronation artifact' }
         ];
         
         for (let j = 0; j < relics.length; j++) {
             const ry = colY + 62 + j * 42;
-            ctx.font = 'bold 13px "Outfit", sans-serif';
+            ctx.font = 'bold 13px "Cinzel", serif';
             ctx.fillStyle = relics[j].c;
             ctx.fillText(`\u25C6 ${relics[j].t}`, cx + 34, ry);
             ctx.font = 'bold 11px "Space Grotesk", monospace';
-            ctx.fillText(`[ ${relics[j].v} ]`, cx + 220, ry);
+            ctx.fillText(`[ ${relics[j].v} ]`, cx + 225, ry);
             ctx.font = '400 12px "Space Grotesk", sans-serif';
-            ctx.fillStyle = '#94A3B8';
+            ctx.fillStyle = '#A39B97';
             ctx.fillText(relics[j].d, cx + 34, ry + 18);
         }
         
-        ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
-        this._roundRect(ctx, cx + 30, colY + colH - 48, colW - 32, 34, 6);
+        ctx.fillStyle = 'rgba(77, 156, 119, 0.15)';
+        this._roundRect(ctx, cx + 30, colY + colH - 52, colW - 32, 36, 6);
         ctx.fill();
         ctx.font = 'bold 11px "Space Grotesk", monospace';
-        ctx.fillStyle = '#10B981';
-        ctx.fillText('WIN: Reach Target Score -> Extract at Portal', cx + 42, colY + colH - 26);
+        ctx.fillStyle = '#6EE7B7';
+        ctx.fillText('WIN: Reach Target Quota -> Extract at Portal', cx + 42, colY + colH - 28);
         
         ctx.textAlign = 'center';
         ctx.font = '500 12px "Space Grotesk", monospace';
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
-        ctx.fillText('PRESS ENTER, SPACE, OR ESC TO RETURN', cx, canvasHeight - 24);
+        ctx.fillStyle = 'rgba(232, 213, 161, 0.7)';
+        ctx.fillText('PRESS ENTER, SPACE, OR ESC TO RETURN', cx, canvasHeight - 22);
         
         ctx.restore();
     }
@@ -1145,53 +1170,53 @@ class PauseScreen extends UIScreen {
     render(ctx, canvasWidth, canvasHeight) {
         ctx.save();
         
-        ctx.fillStyle = 'rgba(5, 8, 15, 0.8)';
+        ctx.fillStyle = 'rgba(11, 10, 14, 0.85)';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
         const cx = canvasWidth / 2;
         const cy = canvasHeight / 2;
-        const modalW = 440;
-        const modalH = 260;
+        const modalW = 460;
+        const modalH = 265;
         
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+        ctx.fillStyle = 'rgba(20, 17, 27, 0.96)';
         this._roundRect(ctx, cx - modalW / 2, cy - modalH / 2, modalW, modalH, 16);
         ctx.fill();
         
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+        ctx.strokeStyle = 'rgba(198, 161, 91, 0.4)';
         ctx.lineWidth = 1.5;
         ctx.stroke();
         
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 28px "Outfit", "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('SIMULATION SUSPENDED', cx, cy - 65);
+        ctx.font = 'bold 28px "Cinzel", "Outfit", serif';
+        ctx.fillStyle = '#FFF1D0';
+        ctx.fillText('EXPEDITION SUSPENDED', cx, cy - 65);
         
         ctx.font = '400 13px "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText('Game loop and agent ticks are currently halted', cx, cy - 35);
+        ctx.fillStyle = '#A39B97';
+        ctx.fillText('Vault physics and AI decision loops are paused', cx, cy - 35);
         
         const actions = [
-            { k: 'P / ESC', d: 'RESUME OPERATION', c: '#38BDF8' },
-            { k: 'R', d: 'RESTART SECTOR', c: '#F59E0B' },
-            { k: 'M', d: 'RETURN TO MENU', c: '#94A3B8' }
+            { k: 'P / ESC', d: 'RESUME EXPEDITION', c: '#D4AF37' },
+            { k: 'R', d: 'RESTART VAULT RUN', c: '#EAB308' },
+            { k: 'M', d: 'RETURN TO MAIN MENU', c: '#A39B97' }
         ];
         
         for (let i = 0; i < actions.length; i++) {
-            const ay = cy + 10 + i * 38;
-            ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
-            this._roundRect(ctx, cx - 180, ay - 14, 360, 30, 6);
+            const ay = cy + 12 + i * 40;
+            ctx.fillStyle = 'rgba(40, 26, 56, 0.6)';
+            this._roundRect(ctx, cx - 185, ay - 14, 370, 32, 6);
             ctx.fill();
             
             ctx.font = 'bold 12px "Space Grotesk", monospace';
             ctx.fillStyle = actions[i].c;
             ctx.textAlign = 'left';
-            ctx.fillText(actions[i].k, cx - 165, ay);
+            ctx.fillText(actions[i].k, cx - 170, ay);
             
             ctx.font = '600 12px "Space Grotesk", sans-serif';
-            ctx.fillStyle = '#E2E8F0';
+            ctx.fillStyle = '#FDFBF7';
             ctx.textAlign = 'right';
-            ctx.fillText(actions[i].d, cx + 165, ay);
+            ctx.fillText(actions[i].d, cx + 170, ay);
         }
         
         ctx.restore();
@@ -1222,8 +1247,8 @@ class LevelResultsScreen extends UIScreen {
         if (inputManager.justPressed('Enter') || inputManager.justPressed('Space') || inputManager.justPressed('KeyN')) {
             sound.playMenuSelect();
             if (this.results && this.results.success) {
-                const nextIdx = this.uiManager.levelSelection + 1;
-                this.uiManager.setSelectedLevel(nextIdx % 3);
+                const nextIdx = (this.uiManager.levelSelection + 1) % levels.length;
+                this.uiManager.setSelectedLevel(nextIdx);
             }
             if (typeof this.uiManager.onStartGame === 'function') {
                 this.uiManager.onStartGame(this.uiManager.levelSelection, this.uiManager.getSelectedDifficulty());
@@ -1248,7 +1273,7 @@ class LevelResultsScreen extends UIScreen {
     render(ctx, canvasWidth, canvasHeight) {
         ctx.save();
         
-        ctx.fillStyle = 'rgba(5, 8, 15, 0.85)';
+        ctx.fillStyle = 'rgba(11, 10, 14, 0.88)';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
         const cx = canvasWidth / 2;
@@ -1257,46 +1282,46 @@ class LevelResultsScreen extends UIScreen {
         const score = this.results ? (this.results.score || 0) : 0;
         const target = this.results ? (this.results.targetScore || 80) : 80;
         
-        const cardW = 500;
-        const cardH = 340;
+        const cardW = 520;
+        const cardH = 345;
         
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
+        ctx.fillStyle = 'rgba(20, 17, 27, 0.96)';
         this._roundRect(ctx, cx - cardW / 2, cy - cardH / 2, cardW, cardH, 16);
         ctx.fill();
         
-        ctx.strokeStyle = isSuccess ? '#10B981' : '#EF4444';
+        ctx.strokeStyle = isSuccess ? '#10B981' : '#E05252';
         ctx.lineWidth = 2;
         ctx.stroke();
         
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 36px "Outfit", "Space Grotesk", sans-serif';
-        ctx.fillStyle = isSuccess ? '#10B981' : '#EF4444';
-        ctx.fillText(isSuccess ? 'EXTRACTION SUCCESSFUL!' : 'MISSION COMPROMISED', cx, cy - 105);
+        ctx.font = 'bold 36px "Cinzel", "Outfit", serif';
+        ctx.fillStyle = isSuccess ? '#10B981' : '#E05252';
+        ctx.fillText(isSuccess ? 'VICTORY ACHIEVED!' : 'EXPEDITION FAILED', cx, cy - 105);
         
         ctx.font = '500 13px "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText(isSuccess ? 'Target quota fulfilled. Portal extraction confirmed.' : 'Failed to reach portal before quota expiration.', cx, cy - 72);
+        ctx.fillStyle = '#A39B97';
+        ctx.fillText(isSuccess ? 'Royal quota fulfilled! Extraction portal successfully breached.' : 'Target quota unreached before vault time limit expired.', cx, cy - 72);
         
-        ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
-        this._roundRect(ctx, cx - 180, cy - 45, 360, 68, 10);
+        ctx.fillStyle = 'rgba(40, 26, 56, 0.7)';
+        this._roundRect(ctx, cx - 190, cy - 45, 380, 68, 10);
         ctx.fill();
         
-        ctx.font = 'bold 14px "Space Grotesk", monospace';
-        ctx.fillStyle = '#38BDF8';
+        ctx.font = 'bold 13px "Space Grotesk", monospace';
+        ctx.fillStyle = '#D4AF37';
         ctx.fillText('FINAL HARVEST SCORE', cx, cy - 28);
         
-        ctx.font = 'bold 32px "Outfit", sans-serif';
-        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 30px "Cinzel", serif';
+        ctx.fillStyle = '#FFF1D0';
         ctx.fillText(`${score} / ${target} PTS`, cx, cy + 4);
         
         const actions = isSuccess ? [
-            { k: 'ENTER / N', d: 'ADVANCE TO NEXT SECTOR', c: '#10B981' },
-            { k: 'R', d: 'REPLAY SECTOR', c: '#F59E0B' },
-            { k: 'M', d: 'MAIN MENU', c: '#94A3B8' }
+            { k: 'ENTER / N', d: 'ADVANCE TO NEXT VAULT', c: '#10B981' },
+            { k: 'R', d: 'REPLAY CURRENT VAULT', c: '#C6A15B' },
+            { k: 'M', d: 'RETURN TO MAIN MENU', c: '#A39B97' }
         ] : [
-            { k: 'R / ENTER', d: 'RETRY SECTOR RUN', c: '#F59E0B' },
-            { k: 'M', d: 'MAIN MENU', c: '#94A3B8' }
+            { k: 'R / ENTER', d: 'RETRY VAULT RUN', c: '#EAB308' },
+            { k: 'M', d: 'MAIN MENU', c: '#A39B97' }
         ];
         
         for (let i = 0; i < actions.length; i++) {
@@ -1304,12 +1329,12 @@ class LevelResultsScreen extends UIScreen {
             ctx.font = 'bold 12px "Space Grotesk", monospace';
             ctx.fillStyle = actions[i].c;
             ctx.textAlign = 'left';
-            ctx.fillText(`[ ${actions[i].k} ]`, cx - 160, ay);
+            ctx.fillText(`[ ${actions[i].k} ]`, cx - 170, ay);
             
             ctx.font = '600 12px "Space Grotesk", sans-serif';
-            ctx.fillStyle = '#E2E8F0';
+            ctx.fillStyle = '#FDFBF7';
             ctx.textAlign = 'right';
-            ctx.fillText(actions[i].d, cx + 160, ay);
+            ctx.fillText(actions[i].d, cx + 170, ay);
         }
         
         ctx.restore();
@@ -1344,25 +1369,25 @@ class GameCompleteScreen extends UIScreen {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        ctx.font = 'bold 52px "Outfit", sans-serif';
-        const grad = ctx.createLinearGradient(cx - 150, 0, cx + 150, 0);
-        grad.addColorStop(0, '#F59E0B');
-        grad.addColorStop(0.5, '#FCD34D');
-        grad.addColorStop(1, '#10B981');
+        ctx.font = 'bold 50px "Cinzel", "Outfit", serif';
+        const grad = ctx.createLinearGradient(cx - 200, 0, cx + 200, 0);
+        grad.addColorStop(0, '#C6A15B');
+        grad.addColorStop(0.5, '#FFF1D0');
+        grad.addColorStop(1, '#D4AF37');
         ctx.fillStyle = grad;
-        ctx.fillText('CAMPAIGN CONQUERED!', cx, cy - 60);
+        ctx.fillText('SOVEREIGN CONQUEST!', cx, cy - 60);
         
-        ctx.font = 'bold 18px "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('ALL DUNGEON SECTORS SECURED AGAINST THE AI HIVE', cx, cy - 10);
+        ctx.font = 'bold 18px "Cinzel", sans-serif';
+        ctx.fillStyle = '#FDFBF7';
+        ctx.fillText('ALL SIX IMPERIAL VAULTS SECURED AGAINST THE AI RIVALS', cx, cy - 10);
         
         ctx.font = '400 14px "Space Grotesk", sans-serif';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText('You outperformed autonomous heuristic agents across every tier.', cx, cy + 25);
+        ctx.fillStyle = '#A39B97';
+        ctx.fillText('You outperformed autonomous heuristic hunters across every dynastic trial.', cx, cy + 25);
         
         ctx.font = 'bold 13px "Space Grotesk", monospace';
-        ctx.fillStyle = '#38BDF8';
-        ctx.fillText('PRESS ENTER OR SPACE TO RETURN TO THE ARENA MATRIX', cx, cy + 85);
+        ctx.fillStyle = '#D4AF37';
+        ctx.fillText('PRESS ENTER OR SPACE TO RETURN TO THE ROYAL ARCHIVES', cx, cy + 85);
         
         ctx.restore();
     }

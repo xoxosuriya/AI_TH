@@ -174,7 +174,8 @@ export class UtilityTargetSelector {
         }
         
         const distanceToTreasure = this._distanceTo(aiAgent.position, treasure.position);
-        const timeToReach = distanceToTreasure / aiAgent.speed; // seconds to reach at current speed
+        const agentSpeed = aiAgent.speed || 100;
+        const timeToReach = distanceToTreasure / agentSpeed; // seconds to reach at current speed
         
         // If we can reach it easily with plenty of time, low urgency
         // If we're running out of time, high urgency
@@ -188,7 +189,8 @@ export class UtilityTargetSelector {
     
     // Generate human-readable reason for target selection
     _generateReason(treasure, valueScore, distanceScore, riskScore, competitionScore, urgencyScore) {
-        const treasureName = treasure.type.charAt(0).toUpperCase() + treasure.type.slice(1);
+        const typeStr = treasure.type || treasure.treasureType || 'relic';
+        const treasureName = typeStr.charAt(0).toUpperCase() + typeStr.slice(1);
         const value = treasure.value;
         
         // Determine dominant factors

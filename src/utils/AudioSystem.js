@@ -2,18 +2,26 @@
 export class AudioSystem {
     constructor() {
         this.ctx = null;
-        this.muted = localStorage.getItem('ai_th_muted') === 'true';
+        let storedMute = false;
+        try {
+            if (typeof localStorage !== 'undefined') {
+                storedMute = localStorage.getItem('ai_th_muted') === 'true';
+            }
+        } catch (_) {}
+        this.muted = storedMute;
         this.masterVolume = 0.25;
         this._initialized = false;
         
         // Auto-unlock on first user interaction
-        const unlock = () => {
-            this.init();
-            window.removeEventListener('keydown', unlock);
-            window.removeEventListener('pointerdown', unlock);
-        };
-        window.addEventListener('keydown', unlock, { once: true });
-        window.addEventListener('pointerdown', unlock, { once: true });
+        if (typeof window !== 'undefined') {
+            const unlock = () => {
+                this.init();
+                window.removeEventListener('keydown', unlock);
+                window.removeEventListener('pointerdown', unlock);
+            };
+            window.addEventListener('keydown', unlock, { once: true });
+            window.addEventListener('pointerdown', unlock, { once: true });
+        }
     }
     
     init() {
@@ -31,7 +39,11 @@ export class AudioSystem {
     
     setMuted(muted) {
         this.muted = !!muted;
-        localStorage.setItem('ai_th_muted', this.muted ? 'true' : 'false');
+        try {
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('ai_th_muted', this.muted ? 'true' : 'false');
+            }
+        } catch (_) {}
     }
     
     toggleMute() {
